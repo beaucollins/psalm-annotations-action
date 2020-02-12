@@ -11,10 +11,13 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Validate composer.json and composer.lock
-      run: composer --working-dir=example validate
+      run: composer validate
+      working-directory: ./example
 
     - name: Composer Install
-      run: composer --working-dir=example install
+      run: composer install
+      working-directory: ./example
     
     - name: Type Check
-      run: composer --working-dir=example check -- --report=report.json --stats
+      run: composer check -- --report=report.json --stats
+      working-directory: ./example
