@@ -21,3 +21,7 @@ jobs:
     - name: Type Check
       run: composer check -- --report=report.json --stats
       working-directory: ./example
+
+    - name: Report Failures
+      if: failure()
+      run: find ./example
