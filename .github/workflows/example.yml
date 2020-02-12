@@ -24,4 +24,6 @@ jobs:
 
     - name: Report Failures
       if: failure()
-      run: cat ./example/report.json
+      uses: beaucollins/psalm-annotations-action@master
+      with:
+        report_path: ./example/report.json

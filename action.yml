@@ -1,0 +1,10 @@
+name: Psalm Report Annotator
+description: Annotate repository with Psalm.
+inputs:
+  report_path:
+    description: 'Location of psalm --report=file.json'
+    required: true
+
+runs:
+  using: 'node12'
+  main: 'report.js'
