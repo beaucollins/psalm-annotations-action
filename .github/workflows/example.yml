@@ -12,6 +12,9 @@ jobs:
 
     - name: Validate composer.json and composer.lock
       run: composer --working-dir=example validate
+
+    - name: Composer Install
+      run: composer --working-dir=example install
     
     - name: Type Check
       run: composer --working-dir=example check -- --report=report.json --stats
