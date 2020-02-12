@@ -1,0 +1,17 @@
+name: 'Example'
+
+on: [push]
+
+jobs:
+  report:
+
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Validate composer.json and composer.lock
+      run: composer --working-dir=example validate
+    
+    - name: Type Check
+      run: composer --working-dir=example check -- --report=report.json --stats

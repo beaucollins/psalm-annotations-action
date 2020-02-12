@@ -1,0 +1,20 @@
+{
+    "name": "beaucollins/psalm-annotations-action",
+    "description": "GitHub Action that publishes psalm annotations",
+    "type": "project",
+    "autoload": {
+        "psr-4": { "\\Collins\\Example\\": "src/"}
+    },
+    "scripts": {
+        "check": "psalm"
+    },
+    "require": {
+        "vimeo/psalm": "^3.8"
+    },
+    "authors": [
+        {
+            "name": "Beau Collins",
+            "email": "beau@collins.pub"
+        }
+    ]
+}
