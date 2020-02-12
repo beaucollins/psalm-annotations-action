@@ -24,4 +24,4 @@ jobs:
 
     - name: Report Failures
       if: failure()
-      run: find ./example
+      run: cat ./example/report.json
