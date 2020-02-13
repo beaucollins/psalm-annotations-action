@@ -15,7 +15,7 @@ jobs:
       working-directory: ./example
 
     - name: Composer Install
-      run: composer install
+      run: composer install --quiet --no-suggest
       working-directory: ./example
     
     - name: Type Check

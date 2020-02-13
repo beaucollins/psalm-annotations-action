@@ -552,7 +552,10 @@ function mapWith(creator) {
 function createCheckRun(owner, repo) {
   return () => octokit.request('POST /repos/:owner/:repo/check-runs', {
     owner,
-    repo
+    repo,
+    headers: {
+      accept: 'application/vnd.github.antiope-preview+json'
+    }
   });
 }
 

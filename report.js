@@ -55,5 +55,10 @@ function mapWith<T, P>(creator: () => Promise<T>): (P) => Promise<[P, T]> {
 }
 
 export function createCheckRun(owner: string, repo: string): () => Promise<*> {
-    return () => octokit.request('POST /repos/:owner/:repo/check-runs', { owner, repo } )
+    return () => octokit.request(
+        'POST /repos/:owner/:repo/check-runs',
+        { owner, repo, headers: {
+            accept: 'application/vnd.github.antiope-preview+json'
+        } }
+    )
 }
