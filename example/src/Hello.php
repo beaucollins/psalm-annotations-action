@@ -5,13 +5,13 @@ final class Hello {
  
     /**
      * @param Action<string,int> $action
-     * @return string
+     * @return array
      */
     public static function main( $action ) {
         $map = new ActionMap(
             $action,
             /**
-             * @var Action<int,string>
+             * @var Action<float,string>
              */
             new ClosureAction(
                 /**
