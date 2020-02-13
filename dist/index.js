@@ -542,20 +542,15 @@ function readContents(path) {
     });
   });
 }
-
-function mapWith(creator) {
-  return function (resolved) {
-    return creator().then(created => [resolved, created]);
-  };
-}
 /**
  * https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
  */
 
 
 function createCheckRun(owner, repo) {
-  return annotations => {
-    console.log('Annotate with', annotations);
+  const mapper = log('annotate')(mapAnnotation(process.env['GITHUB_WORKSPACE']));
+  return issues => {
+    console.log('Annotate with', issues);
     return octokit.checks.create({
       owner,
       repo,
@@ -565,9 +560,47 @@ function createCheckRun(owner, repo) {
       conclusion: 'neutral',
       output: {
         title: 'Psalm PHP Static Analysis',
-        summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)'
+        summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)',
+        annotations: issues.map(mapper)
       }
     });
+  };
+}
+
+function mapLevel(issue) {
+  switch (issue.severity) {
+    case 'info':
+      return 'warning';
+
+    case 'error':
+      return 'failure';
+
+    default:
+      {
+        return 'notice';
+      }
+  }
+}
+
+function mapAnnotation(pathPrefix = '') {
+  return issue => ({
+    path: issue.file_path.slice(pathPrefix.length),
+    annotation_level: mapLevel(issue),
+    start_line: issue.line_from,
+    end_line: issue.line_to,
+    message: issue.message,
+    start_column: issue.column_from,
+    end_column: issue.column_to,
+    title: issue.type
+  });
+}
+
+function log(label) {
+  return fn => {
+    return (...args) => {
+      console.log('label', ...args);
+      return fn(...args);
+    };
   };
 }
 
