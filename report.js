@@ -54,11 +54,26 @@ function mapWith<T, P>(creator: () => Promise<T>): (P) => Promise<[P, T]> {
     }
 }
 
+/**
+ * https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+ */
+
 export function createCheckRun(owner: string, repo: string): () => Promise<*> {
     return () => octokit.request(
         'POST /repos/:owner/:repo/check-runs',
-        { owner, repo, headers: {
-            accept: 'application/vnd.github.antiope-preview+json'
-        } }
+        { 
+            owner,
+            repo,
+            headers: {
+                accept: 'application/vnd.github.antiope-preview+json',
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: 'psalm',
+                head_sha: process.env['GITHUB_SHA'],
+                status: 'completed',
+                conclusion: 'neutral'  
+            })
+        }
     )
 }

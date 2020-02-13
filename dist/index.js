@@ -548,14 +548,25 @@ function mapWith(creator) {
     return creator().then(created => [resolved, created]);
   };
 }
+/**
+ * https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+ */
+
 
 function createCheckRun(owner, repo) {
   return () => octokit.request('POST /repos/:owner/:repo/check-runs', {
     owner,
     repo,
     headers: {
-      accept: 'application/vnd.github.antiope-preview+json'
-    }
+      accept: 'application/vnd.github.antiope-preview+json',
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: 'psalm',
+      head_sha: process.env['GITHUB_SHA'],
+      status: 'completed',
+      conclusion: 'neutral'
+    })
   });
 }
 
