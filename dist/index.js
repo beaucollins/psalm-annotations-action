@@ -561,12 +561,10 @@ function createCheckRun(owner, repo) {
       accept: 'application/vnd.github.antiope-preview+json',
       'content-type': 'application/json'
     },
-    body: JSON.stringify({
-      name: 'psalm',
-      head_sha: process.env['GITHUB_SHA'],
-      status: 'completed',
-      conclusion: 'neutral'
-    })
+    name: 'psalm',
+    head_sha: process.env['GITHUB_SHA'],
+    status: 'completed',
+    conclusion: 'neutral'
   });
 }
 
