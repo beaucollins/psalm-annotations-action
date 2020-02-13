@@ -7,7 +7,7 @@ const github = require('@actions/github');
 const { readFile } = require('fs');
 const { Octokit } = require('@octokit/action');
 
-const octokit = new Octokit();
+export const octokit = new Octokit();
 
 
 try {
@@ -54,8 +54,6 @@ function mapWith<T, P>(creator: () => Promise<T>): (P) => Promise<[P, T]> {
     }
 }
 
-function createCheckRun(owner: string, repo: string): () => Promise<*> {
-    return () => {
-        return octokit.issues.get({owner, repo})
-    }
+export function createCheckRun(owner: string, repo: string): () => Promise<*> {
+    return () => octokit.request('POST /repos/:owner/:repo/check-runs', { owner, repo } )
 }

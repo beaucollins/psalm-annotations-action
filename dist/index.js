@@ -486,10 +486,16 @@ module.exports = require("os");
 /***/ }),
 
 /***/ 108:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createCheckRun = createCheckRun;
+exports.octokit = void 0;
 
 const core = __webpack_require__(470);
 
@@ -504,6 +510,7 @@ const {
 } = __webpack_require__(725);
 
 const octokit = new Octokit();
+exports.octokit = octokit;
 
 try {
   const repository = process.env['GITHUB_REPOSITORY'];
@@ -543,12 +550,10 @@ function mapWith(creator) {
 }
 
 function createCheckRun(owner, repo) {
-  return () => {
-    return octokit.issues.get({
-      owner,
-      repo
-    });
-  };
+  return () => octokit.request('POST /repos/:owner/:repo/check-runs', {
+    owner,
+    repo
+  });
 }
 
 /***/ }),
