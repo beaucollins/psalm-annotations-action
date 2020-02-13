@@ -5,20 +5,20 @@ final class Hello {
  
     /**
      * @param Action<string,int> $action
-     * @return array
+     * @return int
      */
     public static function main( $action ) {
         $map = new ActionMap(
             $action,
-            /**
-             * @var Action<float,string>
-             */
             new ClosureAction(
                 /**
                  * @param int $incoming
+                 * @return \stdClass
                  */
                 function ( $incoming ) {
-                    return (string) $incoming;
+                    $item = new \stdClass;
+                    $item->value = $incoming;
+                    return $item;
                 }
             )
         );

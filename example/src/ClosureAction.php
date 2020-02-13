@@ -9,6 +9,9 @@ namespace Collins\Example;
  */
 final class ClosureAction implements Action {
 
+    /**
+     * @param closure(I):O
+     */
     private $closure;
 
     /**
