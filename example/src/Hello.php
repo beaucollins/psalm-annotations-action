@@ -8,7 +8,21 @@ final class Hello {
      * @return string
      */
     public static function main( $action ) {
-        return $action->perform( 'hello', 'there' );
+        $map = new ActionMap(
+            $action,
+            /**
+             * @var Action<int,string>
+             */
+            new ClosureAction(
+                /**
+                 * @param int $incoming
+                 */
+                function ( $incoming ) {
+                    return (string) $incoming;
+                }
+            )
+        );
+        return $action->perform( 'hello', 'there', 'four' );
     }
 
 }

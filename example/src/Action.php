@@ -8,7 +8,7 @@ namespace Collins\Example;
 interface Action {
 
     /**
-     * @param Input $input;
+     * @param Input $input
      * @return Output
      */
     function perform( $input );
