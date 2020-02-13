@@ -22,7 +22,7 @@ final class Hello {
                 }
             )
         );
-        return $action->perform( 'hello', 'there', 'four' );
+        return $map->perform( 'hello' );
     }
 
 }
