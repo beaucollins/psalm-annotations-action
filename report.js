@@ -139,20 +139,17 @@ function mapLevel(issue: Issue): $PropertyType<Annotation, 'annotation_level'> {
 }
 
 function mapAnnotation(pathPrefix = ''): Issue => Annotation {
-    return issue => {
-        const path = issue.file_path.slice(pathPrefix.length);
-        console.log('remove', pathPrefix, 'from', issue.file_path, path);
-        return {
-            path,
-            annotation_level: mapLevel(issue),
-            start_line: issue.line_from,
-            end_line: issue.line_to,
-            message: issue.message,
-            start_column: issue.column_from,
-            end_column: issue.column_to,
-            title: issue.type
-        };
-    };
+    return issue => ({
+        path: issue.file_path.slice(pathPrefix.length),
+        annotation_level: mapLevel(issue),
+        start_line: issue.line_from,
+        end_line: issue.line_to,
+        message: issue.message,
+        start_column: issue.column_from,
+        end_column: issue.column_to,
+        title: issue.type,
+        raw_details: issue.snippet
+    });
 }
 
 function trailingSlash($path: void | null | string): string {
