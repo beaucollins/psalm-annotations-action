@@ -598,8 +598,9 @@ function mapAnnotation(pathPrefix = '') {
 function log(label) {
   return fn => {
     return (...args) => {
-      console.log('label', ...args);
-      return fn(...args);
+      const r = fn(...args);
+      console.log('label', ...args, r);
+      return r;
     };
   };
 }
