@@ -51,7 +51,7 @@ function readContents( path ): Promise<Buffer> {
  */
 
 export function createCheckRun(owner: string, repo: string): (any) => Promise<*> {
-    const mapper: Issue => Annotation = log('annotate')(mapAnnotation(trailingSlash(process.env['GITHUB_WORKSPACE'])));
+    const mapper: Issue => Annotation = mapAnnotation(trailingSlash(process.env['GITHUB_WORKSPACE']));
     return (issues: Array<Issue>) => {
         return octokit.checks.create({
             owner,
@@ -139,26 +139,20 @@ function mapLevel(issue: Issue): $PropertyType<Annotation, 'annotation_level'> {
 }
 
 function mapAnnotation(pathPrefix = ''): Issue => Annotation {
-    return issue => ({
-        path: issue.file_path.slice(pathPrefix.length),
-        annotation_level: mapLevel(issue),
-        start_line: issue.line_from,
-        end_line: issue.line_to,
-        message: issue.message,
-        start_column: issue.column_from,
-        end_column: issue.column_to,
-        title: issue.type
-    });
-}
-
-function log<T:Array<*>, R>(label: string): ((...T) => R) => (...T) => R {
-    return (fn) => {
-        return (...args) => {
-            const r = fn(...args)
-            console.log('label', ...args, r);
-            return r;
+    return issue => {
+        const path = issue.file_path.slice(pathPrefix.length);
+        console.log('remove', pathPrefix, 'from', issue.file_path, path);
+        return {
+            path,
+            annotation_level: mapLevel(issue),
+            start_line: issue.line_from,
+            end_line: issue.line_to,
+            message: issue.message,
+            start_column: issue.column_from,
+            end_column: issue.column_to,
+            title: issue.type
         };
-    }
+    };
 }
 
 function trailingSlash($path: void | null | string): string {

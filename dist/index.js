@@ -548,7 +548,7 @@ function readContents(path) {
 
 
 function createCheckRun(owner, repo) {
-  const mapper = log('annotate')(mapAnnotation(trailingSlash(process.env['GITHUB_WORKSPACE'])));
+  const mapper = mapAnnotation(trailingSlash(process.env['GITHUB_WORKSPACE']));
   return issues => {
     return octokit.checks.create({
       owner,
@@ -582,24 +582,18 @@ function mapLevel(issue) {
 }
 
 function mapAnnotation(pathPrefix = '') {
-  return issue => ({
-    path: issue.file_path.slice(pathPrefix.length),
-    annotation_level: mapLevel(issue),
-    start_line: issue.line_from,
-    end_line: issue.line_to,
-    message: issue.message,
-    start_column: issue.column_from,
-    end_column: issue.column_to,
-    title: issue.type
-  });
-}
-
-function log(label) {
-  return fn => {
-    return (...args) => {
-      const r = fn(...args);
-      console.log('label', ...args, r);
-      return r;
+  return issue => {
+    const path = issue.file_path.slice(pathPrefix.length);
+    console.log('remove', pathPrefix, 'from', issue.file_path, path);
+    return {
+      path,
+      annotation_level: mapLevel(issue),
+      start_line: issue.line_from,
+      end_line: issue.line_to,
+      message: issue.message,
+      start_column: issue.column_from,
+      end_column: issue.column_to,
+      title: issue.type
     };
   };
 }
