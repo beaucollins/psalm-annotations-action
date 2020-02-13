@@ -521,7 +521,7 @@ try {
 
   const [owner, repo] = repository.split('/');
   const path = core.getInput('report_path');
-  main(path).then(buffer => buffer).then(mapWith(createCheckRun(owner, repo))).then(result => console.log('success', result), error => core.setFailed(error.message));
+  main(path).then(buffer => JSON.parse(buffer.toString('utf-8'))).then(createCheckRun(owner, repo)).then(result => console.log('success', result), error => core.setFailed(error.message));
 } catch (error) {
   core.setFailed(error.message);
 }
@@ -554,14 +554,21 @@ function mapWith(creator) {
 
 
 function createCheckRun(owner, repo) {
-  return () => octokit.checks.create({
-    owner,
-    repo,
-    name: 'psalm',
-    head_sha: process.env['GITHUB_SHA'],
-    status: 'completed',
-    conclusion: 'neutral'
-  });
+  return annotations => {
+    console.log('Annotate with', annotations);
+    return octokit.checks.create({
+      owner,
+      repo,
+      name: 'psalm',
+      head_sha: process.env['GITHUB_SHA'],
+      status: 'completed',
+      conclusion: 'neutral',
+      object: {
+        title: 'Psalm PHP Static Analysis',
+        summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)'
+      }
+    });
+  };
 }
 
 /***/ }),

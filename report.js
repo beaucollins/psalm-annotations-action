@@ -19,8 +19,8 @@ try {
 
     const path = core.getInput('report_path');
     main(path)
-        .then(buffer => buffer)
-        .then(mapWith(createCheckRun(owner, repo)))
+        .then(buffer => JSON.parse(buffer.toString('utf-8')))
+        .then(createCheckRun(owner, repo))
         .then(
             result => console.log('success', result),
             error => core.setFailed(error.message)
@@ -58,13 +58,20 @@ function mapWith<T, P>(creator: () => Promise<T>): (P) => Promise<[P, T]> {
  * https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
  */
 
-export function createCheckRun(owner: string, repo: string): () => Promise<*> {
-    return () => octokit.checks.create({
-        owner,
-        repo,
-        name: 'psalm',
-        head_sha: process.env['GITHUB_SHA'],
-        status: 'completed',
-        conclusion: 'neutral'
-    });
+export function createCheckRun(owner: string, repo: string): (any) => Promise<*> {
+    return (annotations) => {
+        console.log('Annotate with', annotations);
+        return octokit.checks.create({
+            owner,
+            repo,
+            name: 'psalm',
+            head_sha: process.env['GITHUB_SHA'],
+            status: 'completed',
+            conclusion: 'neutral',
+            object: {
+                title: 'Psalm PHP Static Analysis',
+                summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)'
+            }
+        });
+    };
 }
