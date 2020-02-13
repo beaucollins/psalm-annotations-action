@@ -51,9 +51,8 @@ function readContents( path ): Promise<Buffer> {
  */
 
 export function createCheckRun(owner: string, repo: string): (any) => Promise<*> {
-    const mapper: Issue => Annotation = log('annotate')(mapAnnotation(process.env['GITHUB_WORKSPACE']));
+    const mapper: Issue => Annotation = log('annotate')(mapAnnotation(trailingSlash(process.env['GITHUB_WORKSPACE'])));
     return (issues: Array<Issue>) => {
-        console.log('Annotate with', issues);
         return octokit.checks.create({
             owner,
             repo,
@@ -160,4 +159,13 @@ function log<T:Array<*>, R>(label: string): ((...T) => R) => (...T) => R {
             return r;
         };
     }
+}
+
+function trailingSlash($path: void | null | string): string {
+    if ( $path == null ) {
+        return '';
+    }
+
+    return $path.slice(-1) === '/' ? $path : $path + '/';
+
 }

@@ -548,9 +548,8 @@ function readContents(path) {
 
 
 function createCheckRun(owner, repo) {
-  const mapper = log('annotate')(mapAnnotation(process.env['GITHUB_WORKSPACE']));
+  const mapper = log('annotate')(mapAnnotation(trailingSlash(process.env['GITHUB_WORKSPACE'])));
   return issues => {
-    console.log('Annotate with', issues);
     return octokit.checks.create({
       owner,
       repo,
@@ -603,6 +602,14 @@ function log(label) {
       return r;
     };
   };
+}
+
+function trailingSlash($path) {
+  if ($path == null) {
+    return '';
+  }
+
+  return $path.slice(-1) === '/' ? $path : $path + '/';
 }
 
 /***/ }),
