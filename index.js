@@ -1,5 +1,5 @@
-const core = require( '@actions/core' );
-const github = require( '@actions/github' );
+const core = require('@actions/core');
+const github = require('@actions/github');
 
 try {
     const path = core.getInput('report_path');
