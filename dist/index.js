@@ -503,6 +503,8 @@ const {
   Octokit
 } = __webpack_require__(725);
 
+const octokit = new Octokit();
+
 try {
   const repository = process.env['GITHUB_REPOSITORY'];
 
@@ -512,7 +514,7 @@ try {
 
   const [owner, repo] = repository.split('/');
   const path = core.getInput('report_path');
-  main(path).then(buffer => buffer).then(mapWith(createCheckRun(owner, repository))).then(result => console.log('success', result), error => core.setFailed(error.message));
+  main(path).then(buffer => buffer).then(mapWith(createCheckRun(owner, repo))).then(result => console.log('success', result), error => core.setFailed(error.message));
 } catch (error) {
   core.setFailed(error.message);
 }
@@ -540,8 +542,13 @@ function mapWith(creator) {
   };
 }
 
-function createCheckRun(owner, repository) {
-  return () => Promise.resolve([owner, repository]);
+function createCheckRun(owner, repo) {
+  return () => {
+    return octokit.issues.get({
+      owner,
+      repo
+    });
+  };
 }
 
 /***/ }),

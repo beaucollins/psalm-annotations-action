@@ -7,6 +7,8 @@ const github = require('@actions/github');
 const { readFile } = require('fs');
 const { Octokit } = require('@octokit/action');
 
+const octokit = new Octokit();
+
 
 try {
     const repository = process.env['GITHUB_REPOSITORY'];
@@ -18,7 +20,7 @@ try {
     const path = core.getInput('report_path');
     main(path)
         .then(buffer => buffer)
-        .then(mapWith(createCheckRun(owner, repository)))
+        .then(mapWith(createCheckRun(owner, repo)))
         .then(
             result => console.log('success', result),
             error => core.setFailed(error.message)
@@ -52,6 +54,8 @@ function mapWith<T, P>(creator: () => Promise<T>): (P) => Promise<[P, T]> {
     }
 }
 
-function createCheckRun(owner: string, repository: string): () => Promise<[string, string]> {
-    return () => Promise.resolve([owner, repository]);
+function createCheckRun(owner: string, repo: string): () => Promise<*> {
+    return () => {
+        return octokit.issues.get({owner, repo})
+    }
 }
