@@ -4,10 +4,13 @@ const { readFile } = require('fs');
 
 try {
     const path = core.getInput('report_path');
-    main(path).then(
-        (result) => console.log('success', result),
-        error => core.setFailed(error.message)
-    );
+    main(path)
+        .then(buffer => buffer.toString('utf8'))
+        .then(JSON.parse)
+        .then(
+            result => console.log('success', result),
+            error => core.setFailed(error.message)
+        );
 } catch (error) {
     core.setFailed(error.message);
 }
@@ -20,7 +23,7 @@ function main( path ) {
  * 
  * @param {string} path 
  */
-async function readContents( path ) {
+function readContents( path ) {
     return new Promise((resolve, reject) => {
         readFile(path, (error, data) => {
             if (error != null) {
