@@ -68,7 +68,7 @@ export function createCheckRun(owner: string, repo: string): (any) => Promise<*>
             head_sha: process.env['GITHUB_SHA'],
             status: 'completed',
             conclusion: 'neutral',
-            object: {
+            output: {
                 title: 'Psalm PHP Static Analysis',
                 summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)'
             }
