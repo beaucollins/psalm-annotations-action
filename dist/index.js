@@ -554,13 +554,9 @@ function mapWith(creator) {
 
 
 function createCheckRun(owner, repo) {
-  return () => octokit.request('POST /repos/:owner/:repo/check-runs', {
+  return () => octokit.checks.create({
     owner,
     repo,
-    headers: {
-      accept: 'application/vnd.github.antiope-preview+json',
-      'content-type': 'application/json'
-    },
     name: 'psalm',
     head_sha: process.env['GITHUB_SHA'],
     status: 'completed',

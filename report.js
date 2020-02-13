@@ -59,19 +59,12 @@ function mapWith<T, P>(creator: () => Promise<T>): (P) => Promise<[P, T]> {
  */
 
 export function createCheckRun(owner: string, repo: string): () => Promise<*> {
-    return () => octokit.request(
-        'POST /repos/:owner/:repo/check-runs',
-        { 
-            owner,
-            repo,
-            headers: {
-                accept: 'application/vnd.github.antiope-preview+json',
-                'content-type': 'application/json'
-            },
-            name: 'psalm',
-            head_sha: process.env['GITHUB_SHA'],
-            status: 'completed',
-            conclusion: 'neutral'  
-        }
-    )
+    return () => octokit.checks.create({
+        owner,
+        repo,
+        name: 'psalm',
+        head_sha: process.env['GITHUB_SHA'],
+        status: 'completed',
+        conclusion: 'neutral'
+    });
 }
