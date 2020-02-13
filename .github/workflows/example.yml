@@ -23,7 +23,7 @@ jobs:
       working-directory: ./example
 
     - name: Report Failures
-      if: failure()
+      if: always()
       uses: beaucollins/psalm-annotations-action@master
       with:
         report_path: ./example/report.json
