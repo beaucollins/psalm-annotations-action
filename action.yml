@@ -7,4 +7,4 @@ inputs:
 
 runs:
   using: 'node12'
-  main: 'report.js'
+  main: 'dist/report.js'
