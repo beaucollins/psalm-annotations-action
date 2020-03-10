@@ -17,14 +17,15 @@ jobs:
     - name: Composer Install
       run: composer install --quiet --no-suggest
       working-directory: ./example
-    
+
     - name: Type Check
       run: composer check -- --report=report.json --stats
       working-directory: ./example
 
     - name: Report Failures
       if: always()
-      uses: beaucollins/psalm-annotations-action@master
+      uses: beaucollins/psalm-annotations-action@options
       with:
+        report_title: LOL
         report_path: ./example/report.json
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
