@@ -24,7 +24,7 @@ jobs:
 
     - name: Report Failures
       if: always()
-      uses: beaucollins/psalm-annotations-action@options
+      uses: beaucollins/psalm-annotations-action@v1.0.1
       with:
         report_title: LOL
         report_path: ./example/report.json
