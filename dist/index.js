@@ -553,12 +553,12 @@ function createCheckRun(owner, repo) {
     return octokit.checks.create({
       owner,
       repo,
-      name: 'psalm',
+      name: core.getInput('report_name'),
       head_sha: process.env['GITHUB_SHA'],
       status: 'completed',
       conclusion: 'neutral',
       output: {
-        title: 'Psalm PHP Static Analysis',
+        title: core.getInput('report_title'),
         summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)',
         annotations: issues.map(mapper)
       }
@@ -582,20 +582,17 @@ function mapLevel(issue) {
 }
 
 function mapAnnotation(pathPrefix = '') {
-  return issue => {
-    const path = issue.file_path.slice(pathPrefix.length);
-    console.log('remove', pathPrefix, 'from', issue.file_path, path);
-    return {
-      path,
-      annotation_level: mapLevel(issue),
-      start_line: issue.line_from,
-      end_line: issue.line_to,
-      message: issue.message,
-      start_column: issue.column_from,
-      end_column: issue.column_to,
-      title: issue.type
-    };
-  };
+  return issue => ({
+    path: issue.file_path.slice(pathPrefix.length),
+    annotation_level: mapLevel(issue),
+    start_line: issue.line_from,
+    end_line: issue.line_to,
+    message: issue.message,
+    start_column: issue.column_from,
+    end_column: issue.column_to,
+    title: issue.type,
+    raw_details: issue.snippet
+  });
 }
 
 function trailingSlash($path) {
