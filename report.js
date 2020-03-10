@@ -42,7 +42,7 @@ function readContents( path ): Promise<Buffer> {
             }
             resolve(data);
         });
-    
+
     });
 }
 
@@ -56,12 +56,12 @@ export function createCheckRun(owner: string, repo: string): (any) => Promise<*>
         return octokit.checks.create({
             owner,
             repo,
-            name: 'psalm',
+            name: core.getInput('report_name'),
             head_sha: process.env['GITHUB_SHA'],
             status: 'completed',
             conclusion: 'neutral',
             output: {
-                title: 'Psalm PHP Static Analysis',
+                title: core.getInput('report_title'),
                 summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)',
                 annotations: issues.map(mapper)
             }

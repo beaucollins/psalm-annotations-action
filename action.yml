@@ -5,6 +5,16 @@ inputs:
     description: 'Location of psalm --report=file.json'
     required: true
 
+  report_name:
+    description: Report name displayed in GitHub
+    required: false
+    default: 'psalm'
+
+  report_title:
+    description: Report title displayed on on GitHub
+    required: false
+    default: Psalm PHP Static Analysis
+
 runs:
   using: 'node12'
   main: 'dist/index.js'
