@@ -12,20 +12,20 @@ jobs:
 
     - name: Validate composer.json and composer.lock
       run: composer validate
-      working-directory: ./example
+      working-directory: ./example-php
 
     - name: Composer Install
       run: composer install --quiet --no-suggest
-      working-directory: ./example
+      working-directory: ./example-php
 
     - name: Type Check
       run: composer check -- --report=report.json --stats
-      working-directory: ./example
+      working-directory: ./example-php
 
     - name: Report Failures
       if: always()
       uses: beaucollins/psalm-annotations-action@options
       with:
         report_title: LOL
-        report_path: ./example/report.json
+        report_path: ./example-php/report.json
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
