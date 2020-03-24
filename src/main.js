@@ -36,7 +36,7 @@ try {
             reportName: getInput('report_name'),
             reportTitle: getInput('report_title'),
             headSha,
-            workspaceDirectory,
+            workspaceDirectory: trailingSlash(workspaceDirectory),
             reportContents: buffer,
         }))
         .then(octokit.checks.create)
@@ -63,4 +63,12 @@ function readContents( path ): Promise<Buffer> {
         });
 
     });
+}
+
+function trailingSlash($path: void | null | string): string {
+    if ( $path == null ) {
+        return '';
+    }
+
+    return $path.slice(-1) === '/' ? $path : $path + '/';
 }

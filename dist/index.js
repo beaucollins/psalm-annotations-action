@@ -603,7 +603,7 @@ try {
     reportName: (0, _core.getInput)('report_name'),
     reportTitle: (0, _core.getInput)('report_title'),
     headSha,
-    workspaceDirectory,
+    workspaceDirectory: trailingSlash(workspaceDirectory),
     reportContents: buffer
   })).then(octokit.checks.create).then(result => console.log('success', result), error => (0, _core.setFailed)(error.message));
 } catch (error) {
@@ -625,6 +625,14 @@ function readContents(path) {
       resolve(data);
     });
   });
+}
+
+function trailingSlash($path) {
+  if ($path == null) {
+    return '';
+  }
+
+  return $path.slice(-1) === '/' ? $path : $path + '/';
 }
 
 /***/ }),
