@@ -72,7 +72,20 @@ function createCheckRun(
 	}
 }
 
-const reporter: Reporter = (options) => {
+function collectBuffers(stream): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const buffers: Buffer[] = [];
+        stream.on('data', (data) => {
+            buffers.push(data);
+        });
+        stream.on('close', () => {
+            resolve(Buffer.concat(buffers));
+        })
+        stream.on('error', reject);
+    })
+}
+
+const reporter: Reporter = async (options) => {
 	return createCheckRun(
 		options.owner,
 		options.repo,
@@ -80,7 +93,7 @@ const reporter: Reporter = (options) => {
 		options.reportTitle,
 		options.headSha,
 		options.workspaceDirectory,
-		JSON.parse(options.reportContents.toString('utf-8'))
+		await collectBuffers(options.reportContents).then((buffer) => JSON.parse(buffer.toString('utf8')))
 	);
 }
 

@@ -1,6 +1,7 @@
 /**
  * @flow
  */
+import type { ReadStream } from 'fs';
 
 export type Annotation = {|
     /**
@@ -62,7 +63,7 @@ type Options = {|
 	reportTitle: string,
 	workspaceDirectory: string,
 	headSha: string,
-	reportContents: Buffer,
+	reportContents: ReadStream,
 |}
 
 export type Reporter = (Options) => (Promise<Check> | Check);

@@ -3,7 +3,7 @@
  */
 import { setFailed, getInput } from '@actions/core';
 import '@actions/github';
-import { readFile } from 'fs';
+import { readFile, createReadStream } from 'fs';
 import { Octokit } from '@octokit/action';
 
 import createCheck from './psalm';
@@ -29,15 +29,15 @@ try {
         throw new Error('GITHUB_WORKSPACE not present');
     }
 
-    main(path)
-        .then((buffer) => createCheck({
+    Promise.resolve(createReadStream(path))
+        .then((stream) => createCheck({
             owner,
             repo,
             reportName: getInput('report_name'),
             reportTitle: getInput('report_title'),
             headSha,
             workspaceDirectory: trailingSlash(workspaceDirectory),
-            reportContents: buffer,
+            reportContents: stream,
         }))
         .then(octokit.checks.create)
         .then(
