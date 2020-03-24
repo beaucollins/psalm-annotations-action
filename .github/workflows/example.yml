@@ -3,7 +3,7 @@ name: 'Example'
 on: [push]
 
 jobs:
-  report:
+  psalm:
 
     runs-on: 'ubuntu-latest'
 
@@ -28,4 +28,27 @@ jobs:
       with:
         report_title: LOL
         report_path: ./example-php/report.json
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  typescript:
+
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: npm install
+      run: npm install
+      working-directory: ./example-ts
+
+    - name: Type Check
+      run: npm run -s check > ./report.txt
+      working-directory: ./example-ts
+
+    - name: Report Failures
+      if: always()
+      uses: beaucollins/psalm-annotations-action@options
+      with:
+        report_title: tsc
+        report_path: ./example-ts/report.txt
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

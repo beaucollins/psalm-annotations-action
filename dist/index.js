@@ -445,8 +445,19 @@ function createCheckRun(owner, repo, reportName, reportTitle, headSha, workingDi
   };
 }
 
-const reporter = options => {
-  return createCheckRun(options.owner, options.repo, options.reportName, options.reportTitle, options.headSha, options.workspaceDirectory, JSON.parse(options.reportContents.toString('utf-8')));
+function collectBuffers(stream) {
+  return new Promise((resolve, reject) => {
+    const buffers = [];
+    stream.on('data', data => {
+      buffers.push(data);
+    }).on('close', () => {
+      resolve(Buffer.concat(buffers));
+    }).on('error', reject).resume();
+  });
+}
+
+const reporter = async options => {
+  return createCheckRun(options.owner, options.repo, options.reportName, options.reportTitle, options.headSha, options.workspaceDirectory, (await collectBuffers(options.reportContents).then(buffer => JSON.parse(buffer.toString('utf8')))));
 };
 
 var _default = reporter;
@@ -597,14 +608,17 @@ try {
     throw new Error('GITHUB_WORKSPACE not present');
   }
 
-  main(path).then(buffer => (0, _psalm.default)({
+  Promise.resolve((0, _fs.createReadStream)(path, {
+    autoClose: true,
+    emitClose: true
+  }).pause()).then(stream => (0, _psalm.default)({
     owner,
     repo,
     reportName: (0, _core.getInput)('report_name'),
     reportTitle: (0, _core.getInput)('report_title'),
     headSha,
     workspaceDirectory: trailingSlash(workspaceDirectory),
-    reportContents: buffer
+    reportContents: stream
   })).then(octokit.checks.create).then(result => console.log('success', result), error => (0, _core.setFailed)(error.message));
 } catch (error) {
   (0, _core.setFailed)(error.message);
