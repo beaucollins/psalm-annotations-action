@@ -1,8 +1,7 @@
 /**
  * @flow
  */
-import type { Annotation } from './annotation';
-import type { Check } from './check';
+import type { Annotation, Check, Reporter } from './reporter';
 
 type Issue = {|
     severity: 'info' | 'error',
@@ -22,7 +21,7 @@ type Issue = {|
     column_to: 29
 |}
 
-export function mapLevel(issue: Issue): $PropertyType<Annotation, 'annotation_level'> {
+function mapLevel(issue: Issue): $PropertyType<Annotation, 'annotation_level'> {
     switch(issue.severity) {
         case 'info':
             return 'warning';
@@ -34,7 +33,7 @@ export function mapLevel(issue: Issue): $PropertyType<Annotation, 'annotation_le
     }
 }
 
-export function mapAnnotation(pathPrefix: string = ''): Issue => Annotation {
+function mapAnnotation(pathPrefix: string = ''): Issue => Annotation {
     return issue => ({
         path: issue.file_path.slice(pathPrefix.length),
         annotation_level: mapLevel(issue),
@@ -48,7 +47,7 @@ export function mapAnnotation(pathPrefix: string = ''): Issue => Annotation {
     });
 }
 
-export function createCheckRun(
+function createCheckRun(
 	owner: string,
 	repo: string,
 	reportName: string,
@@ -72,3 +71,17 @@ export function createCheckRun(
 		}
 	}
 }
+
+const reporter: Reporter = (options) => {
+	return createCheckRun(
+		options.owner,
+		options.repo,
+		options.reportName,
+		options.reportTitle,
+		options.headSha,
+		options.workspaceDirectory,
+		JSON.parse(options.reportContents.toString('utf-8'))
+	);
+}
+
+export default reporter;

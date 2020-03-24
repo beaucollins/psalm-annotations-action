@@ -1,4 +1,4 @@
-module.exports =
+require('./sourcemap-register.js');module.exports =
 /******/ (function(modules, runtime) { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	// The module cache
@@ -34,7 +34,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(108);
+/******/ 		return __webpack_require__(102);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -388,6 +388,72 @@ module.exports._enoent = enoent;
 
 /***/ }),
 
+/***/ 24:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function mapLevel(issue) {
+  switch (issue.severity) {
+    case 'info':
+      return 'warning';
+
+    case 'error':
+      return 'failure';
+
+    default:
+      {
+        return 'notice';
+      }
+  }
+}
+
+function mapAnnotation(pathPrefix = '') {
+  return issue => ({
+    path: issue.file_path.slice(pathPrefix.length),
+    annotation_level: mapLevel(issue),
+    start_line: issue.line_from,
+    end_line: issue.line_to,
+    message: issue.message,
+    start_column: issue.column_from,
+    end_column: issue.column_to,
+    title: issue.type,
+    raw_details: issue.snippet
+  });
+}
+
+function createCheckRun(owner, repo, reportName, reportTitle, headSha, workingDirectory, issues) {
+  const mapper = mapAnnotation(workingDirectory);
+  return {
+    owner,
+    repo,
+    name: reportName,
+    head_sha: headSha,
+    status: 'completed',
+    conclusion: 'neutral',
+    output: {
+      title: reportTitle,
+      summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)',
+      annotations: issues.map(mapper)
+    }
+  };
+}
+
+const reporter = options => {
+  return createCheckRun(options.owner, options.repo, options.reportName, options.reportTitle, options.headSha, options.workspaceDirectory, JSON.parse(options.reportContents.toString('utf-8')));
+};
+
+var _default = reporter;
+exports.default = _default;
+
+/***/ }),
+
 /***/ 39:
 /***/ (function(module) {
 
@@ -485,7 +551,7 @@ module.exports = require("os");
 
 /***/ }),
 
-/***/ 108:
+/***/ 102:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
@@ -504,7 +570,7 @@ var _fs = __webpack_require__(747);
 
 var _action = __webpack_require__(725);
 
-var _psalm = __webpack_require__(680);
+var _psalm = _interopRequireDefault(__webpack_require__(24));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -523,17 +589,25 @@ try {
   const path = _core.default.getInput('report_path');
 
   const headSha = process.env['GITHUB_SHA'];
-  const workspaceDir = process.env['GITHUB_WORKSPACE'];
+  const workspaceDirectory = process.env['GITHUB_WORKSPACE'];
 
   if (headSha == null) {
     throw new Error('GITHUB_SHA no present');
   }
 
-  if (workspaceDir == null) {
+  if (workspaceDirectory == null) {
     throw new Error('GITHUB_WORKSPACE not present');
   }
 
-  main(path).then(buffer => JSON.parse(buffer.toString('utf-8'))).then(json => (0, _psalm.createCheckRun)(owner, repo, _core.default.getInput('report_name'), _core.default.getInput('report_title'), headSha, workspaceDir, json)).then(octokit.checks.create).then(result => console.log('success', result), error => _core.default.setFailed(error.message));
+  main(path).then(buffer => (0, _psalm.default)({
+    owner,
+    repo,
+    reportName: _core.default.getInput('report_name'),
+    reportTitle: _core.default.getInput('report_title'),
+    headSha,
+    workspaceDirectory,
+    reportContents: buffer
+  })).then(octokit.checks.create).then(result => console.log('success', result), error => _core.default.setFailed(error.message));
 } catch (error) {
   _core.default.setFailed(error.message);
 }
@@ -8752,14 +8826,6 @@ function authenticate(state, options) {
 module.exports = function btoa(str) {
   return new Buffer(str).toString('base64')
 }
-
-
-/***/ }),
-
-/***/ 680:
-/***/ (function() {
-
-eval("require")("./src/psalm");
 
 
 /***/ }),
@@ -25560,3 +25626,4 @@ function onceStrict (fn) {
 /***/ })
 
 /******/ });
+//# sourceMappingURL=index.js.map

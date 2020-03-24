@@ -6,7 +6,7 @@ import github from '@actions/github';
 import { readFile } from 'fs';
 import { Octokit } from '@octokit/action';
 
-import { mapLevel, mapAnnotation, createCheckRun } from './src/psalm';
+import createCheck from './psalm';
 
 export const octokit = new Octokit();
 
@@ -19,27 +19,26 @@ try {
 
     const path = core.getInput('report_path');
     const headSha = process.env['GITHUB_SHA'];
-    const workspaceDir = process.env['GITHUB_WORKSPACE'];
+    const workspaceDirectory = process.env['GITHUB_WORKSPACE'];
 
     if (headSha == null) {
         throw new Error('GITHUB_SHA no present');
     }
 
-    if (workspaceDir == null) {
+    if (workspaceDirectory == null) {
         throw new Error('GITHUB_WORKSPACE not present');
     }
 
     main(path)
-        .then(buffer => JSON.parse(buffer.toString('utf-8')))
-        .then((json) => createCheckRun(
+        .then((buffer) => createCheck({
             owner,
             repo,
-            core.getInput('report_name'),
-            core.getInput('report_title'),
+            reportName: core.getInput('report_name'),
+            reportTitle: core.getInput('report_title'),
             headSha,
-            workspaceDir,
-            json
-        ))
+            workspaceDirectory,
+            reportContents: buffer,
+        }))
         .then(octokit.checks.create)
         .then(
             result => console.log('success', result),

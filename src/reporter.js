@@ -1,6 +1,7 @@
 /**
  * @flow
  */
+
 export type Annotation = {|
     /**
      * The level of the annotation. Can be one of `notice`, `warning`, or `failure`.
@@ -39,3 +40,29 @@ export type Annotation = {|
      */
     title?: string;
 |}
+
+export type Check = {|
+	owner: string,
+	repo: string,
+	name: string,
+	head_sha: string,
+	status: 'completed',
+	conclusion: 'neutral',
+	output: {
+		title: string,
+		summary: string,
+		annotations: Annotation[],
+	}
+|}
+
+type Options = {|
+	owner: string,
+	repo: string,
+	reportName: string,
+	reportTitle: string,
+	workspaceDirectory: string,
+	headSha: string,
+	reportContents: Buffer,
+|}
+
+export type Reporter = (Options) => (Promise<Check> | Check);

@@ -8,10 +8,10 @@
   },
   "scripts": {
     "check": "flow",
-    "build": "babel --out-dir build report.js",
-    "pack": "ncc build -o dist/ build/report.js",
+    "build": "babel --out-dir build ./src",
+    "pack": "ncc build -s -o dist/ build/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "npm run check && npm run build && npm run pack"
+    "release": "npm run -s check && npm run -s build && npm run -s pack"
   },
   "keywords": [],
   "author": "",
