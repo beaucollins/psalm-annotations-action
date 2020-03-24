@@ -562,9 +562,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.octokit = void 0;
 
-var _core = _interopRequireDefault(__webpack_require__(470));
+var _core = __webpack_require__(470);
 
-var _github = _interopRequireDefault(__webpack_require__(469));
+__webpack_require__(469);
 
 var _fs = __webpack_require__(747);
 
@@ -585,9 +585,7 @@ try {
   }
 
   const [owner, repo] = repository.split('/');
-
-  const path = _core.default.getInput('report_path');
-
+  const path = (0, _core.getInput)('report_path');
   const headSha = process.env['GITHUB_SHA'];
   const workspaceDirectory = process.env['GITHUB_WORKSPACE'];
 
@@ -602,14 +600,14 @@ try {
   main(path).then(buffer => (0, _psalm.default)({
     owner,
     repo,
-    reportName: _core.default.getInput('report_name'),
-    reportTitle: _core.default.getInput('report_title'),
+    reportName: (0, _core.getInput)('report_name'),
+    reportTitle: (0, _core.getInput)('report_title'),
     headSha,
     workspaceDirectory,
     reportContents: buffer
-  })).then(octokit.checks.create).then(result => console.log('success', result), error => _core.default.setFailed(error.message));
+  })).then(octokit.checks.create).then(result => console.log('success', result), error => (0, _core.setFailed)(error.message));
 } catch (error) {
-  _core.default.setFailed(error.message);
+  (0, _core.setFailed)(error.message);
 }
 
 function main(path) {

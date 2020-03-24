@@ -1,8 +1,8 @@
 /**
  * @flow
  */
-import core from '@actions/core';
-import github from '@actions/github';
+import { setFailed, getInput } from '@actions/core';
+import '@actions/github';
 import { readFile } from 'fs';
 import { Octokit } from '@octokit/action';
 
@@ -17,7 +17,7 @@ try {
     }
     const [owner, repo] = repository.split('/');
 
-    const path = core.getInput('report_path');
+    const path = getInput('report_path');
     const headSha = process.env['GITHUB_SHA'];
     const workspaceDirectory = process.env['GITHUB_WORKSPACE'];
 
@@ -33,8 +33,8 @@ try {
         .then((buffer) => createCheck({
             owner,
             repo,
-            reportName: core.getInput('report_name'),
-            reportTitle: core.getInput('report_title'),
+            reportName: getInput('report_name'),
+            reportTitle: getInput('report_title'),
             headSha,
             workspaceDirectory,
             reportContents: buffer,
@@ -42,10 +42,10 @@ try {
         .then(octokit.checks.create)
         .then(
             result => console.log('success', result),
-            error => core.setFailed(error.message)
+            error => setFailed(error.message)
         );
 } catch (error) {
-    core.setFailed(error.message);
+    setFailed(error.message);
 }
 
 function main( path ) {
