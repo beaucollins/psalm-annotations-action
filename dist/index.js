@@ -494,22 +494,21 @@ module.exports = require("os");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createCheckRun = createCheckRun;
 exports.octokit = void 0;
 
-const core = __webpack_require__(470);
+var _core = _interopRequireDefault(__webpack_require__(470));
 
-const github = __webpack_require__(469);
+var _github = _interopRequireDefault(__webpack_require__(469));
 
-const {
-  readFile
-} = __webpack_require__(747);
+var _fs = __webpack_require__(747);
 
-const {
-  Octokit
-} = __webpack_require__(725);
+var _action = __webpack_require__(725);
 
-const octokit = new Octokit();
+var _psalm = __webpack_require__(680);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const octokit = new _action.Octokit();
 exports.octokit = octokit;
 
 try {
@@ -520,10 +519,23 @@ try {
   }
 
   const [owner, repo] = repository.split('/');
-  const path = core.getInput('report_path');
-  main(path).then(buffer => JSON.parse(buffer.toString('utf-8'))).then(createCheckRun(owner, repo)).then(result => console.log('success', result), error => core.setFailed(error.message));
+
+  const path = _core.default.getInput('report_path');
+
+  const headSha = process.env['GITHUB_SHA'];
+  const workspaceDir = process.env['GITHUB_WORKSPACE'];
+
+  if (headSha == null) {
+    throw new Error('GITHUB_SHA no present');
+  }
+
+  if (workspaceDir == null) {
+    throw new Error('GITHUB_WORKSPACE not present');
+  }
+
+  main(path).then(buffer => JSON.parse(buffer.toString('utf-8'))).then(json => (0, _psalm.createCheckRun)(owner, repo, _core.default.getInput('report_name'), _core.default.getInput('report_title'), headSha, workspaceDir, json)).then(octokit.checks.create).then(result => console.log('success', result), error => _core.default.setFailed(error.message));
 } catch (error) {
-  core.setFailed(error.message);
+  _core.default.setFailed(error.message);
 }
 
 function main(path) {
@@ -532,7 +544,7 @@ function main(path) {
 
 function readContents(path) {
   return new Promise((resolve, reject) => {
-    readFile(path, (error, data) => {
+    (0, _fs.readFile)(path, (error, data) => {
       if (error != null) {
         reject(error);
         return;
@@ -541,66 +553,6 @@ function readContents(path) {
       resolve(data);
     });
   });
-}
-/**
- * https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
- */
-
-
-function createCheckRun(owner, repo) {
-  const mapper = mapAnnotation(trailingSlash(process.env['GITHUB_WORKSPACE']));
-  return issues => {
-    return octokit.checks.create({
-      owner,
-      repo,
-      name: core.getInput('report_name'),
-      head_sha: process.env['GITHUB_SHA'],
-      status: 'completed',
-      conclusion: 'neutral',
-      output: {
-        title: core.getInput('report_title'),
-        summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)',
-        annotations: issues.map(mapper)
-      }
-    });
-  };
-}
-
-function mapLevel(issue) {
-  switch (issue.severity) {
-    case 'info':
-      return 'warning';
-
-    case 'error':
-      return 'failure';
-
-    default:
-      {
-        return 'notice';
-      }
-  }
-}
-
-function mapAnnotation(pathPrefix = '') {
-  return issue => ({
-    path: issue.file_path.slice(pathPrefix.length),
-    annotation_level: mapLevel(issue),
-    start_line: issue.line_from,
-    end_line: issue.line_to,
-    message: issue.message,
-    start_column: issue.column_from,
-    end_column: issue.column_to,
-    title: issue.type,
-    raw_details: issue.snippet
-  });
-}
-
-function trailingSlash($path) {
-  if ($path == null) {
-    return '';
-  }
-
-  return $path.slice(-1) === '/' ? $path : $path + '/';
 }
 
 /***/ }),
@@ -8800,6 +8752,14 @@ function authenticate(state, options) {
 module.exports = function btoa(str) {
   return new Buffer(str).toString('base64')
 }
+
+
+/***/ }),
+
+/***/ 680:
+/***/ (function() {
+
+eval("require")("./src/psalm");
 
 
 /***/ }),
