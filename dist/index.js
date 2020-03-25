@@ -4108,6 +4108,7 @@ const errorPattern = /([^(]{1,})\(([\d]{1,}),([\d]{1,})\):([^:]{1,}):(.*)/i;
 
 function read(onLine, stream) {
   return new Promise((resolve, reject) => {
+    let remainder = '';
     stream.once('readable', async () => {
       let buffer;
 
@@ -4116,14 +4117,16 @@ function read(onLine, stream) {
           buffer = buffer.toString('utf8');
         }
 
-        const lines = buffer.split('\n');
+        const lines = remainder.concat(buffer).split('\n');
+        remainder = lines.pop();
 
         for (const line of lines) {
           await onLine(line);
         }
       }
 
-      resolve([]);
+      await onLine(remainder);
+      resolve();
     });
   });
 }
