@@ -583,6 +583,8 @@ var _action = __webpack_require__(725);
 
 var _psalm = _interopRequireDefault(__webpack_require__(24));
 
+var _typescript = _interopRequireDefault(__webpack_require__(290));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const octokit = new _action.Octokit();
@@ -608,10 +610,16 @@ try {
     throw new Error('GITHUB_WORKSPACE not present');
   }
 
+  const reporter = selectReporter((0, _core.getInput)('report_type'));
+
+  if (!reporter) {
+    throw new Error('Unknown report type: ' + (0, _core.getInput)('report_type'));
+  }
+
   Promise.resolve((0, _fs.createReadStream)(path, {
     autoClose: true,
     emitClose: true
-  }).pause()).then(stream => (0, _psalm.default)({
+  }).pause()).then(stream => reporter({
     owner,
     repo,
     reportName: (0, _core.getInput)('report_name'),
@@ -647,6 +655,21 @@ function trailingSlash($path) {
   }
 
   return $path.slice(-1) === '/' ? $path : $path + '/';
+}
+
+function selectReporter(type) {
+  switch (type) {
+    case 'typescript':
+      {
+        return _typescript.default;
+      }
+
+    case 'psalm':
+    default:
+      {
+        return _psalm.default;
+      }
+  }
 }
 
 /***/ }),
@@ -4061,6 +4084,113 @@ function coerce (version) {
     '.' + (match[3] || '0'))
 }
 
+
+/***/ }),
+
+/***/ 290:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+const errorPattern = /([^(]{1,})\(([\d]{1,}),([\d]{1,})\):([^:]{1,}):(.*)/i;
+
+function read(onLine, stream) {
+  return new Promise((resolve, reject) => {
+    stream.once('readable', async () => {
+      let buffer;
+
+      while (buffer = stream.read()) {
+        if (buffer instanceof Buffer) {
+          buffer = buffer.toString('utf8');
+        }
+
+        const lines = buffer.split('\n');
+
+        for (const line of lines) {
+          await onLine(line);
+        }
+      }
+
+      resolve([]);
+    });
+  });
+}
+
+function mapIssue(issue) {
+  return {
+    path: issue.path,
+    annotation_level: 'failure',
+    message: issue.message,
+    title: issue.message,
+    raw_details: issue.full.concat(issue.extra ? issue.extra : ''),
+    start_line: issue.line,
+    end_line: issue.line,
+    start_column: issue.column
+  };
+}
+
+function parseReport(stream) {
+  const annotations = [];
+  let issue = null;
+  return read(async line => {
+    let match;
+
+    if (match = errorPattern.exec(line)) {
+      if (issue) {
+        annotations.push(mapIssue(issue));
+      }
+
+      const [full, file, line, column, code, message] = match;
+      issue = {
+        full,
+        line: parseInt(line),
+        column: parseInt(column),
+        path: file,
+        message: message.trim(),
+        code: code.trim()
+      };
+    } else if (issue) {
+      issue = { ...issue,
+        extra: issue.extra ? issue.extra.concat(line) : line
+      };
+    }
+  }, stream).then(stats => {
+    if (issue) {
+      annotations.push(mapIssue(issue));
+    }
+
+    return annotations;
+  });
+}
+
+const reporter = async options => {
+  const {
+    repo,
+    owner,
+    headSha: head_sha
+  } = options;
+  return {
+    repo,
+    owner,
+    head_sha,
+    name: options.reportName,
+    status: 'completed',
+    conclusion: 'neutral',
+    output: {
+      title: options.reportTitle,
+      summary: 'TypeScript Report',
+      annotations: await parseReport(options.reportContents)
+    }
+  };
+};
+
+var _default = reporter;
+exports.default = _default;
 
 /***/ }),
 
