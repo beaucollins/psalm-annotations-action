@@ -631,7 +631,7 @@ try {
     workspaceDirectory: trailingSlash(workspaceDirectory),
     relativeDirectory,
     reportContents: stream
-  })).then(octokit.checks.create).then(result => console.log('success', result), error => (0, _core.setFailed)(error.message));
+  })).then(octokit.checks.create).then(result => console.log('success', result.data.url), error => (0, _core.setFailed)(error.message));
 } catch (error) {
   (0, _core.setFailed)(error.message);
 }

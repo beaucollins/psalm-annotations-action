@@ -53,7 +53,7 @@ try {
         }))
         .then(octokit.checks.create)
         .then(
-            result => console.log('success', result),
+            (result: any) => console.log('success', result.data.url),
             error => setFailed(error.message)
         );
 } catch (error) {
