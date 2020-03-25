@@ -8,10 +8,10 @@
   },
   "scripts": {
     "check": "flow",
-    "build": "babel --out-dir build report.js",
-    "pack": "ncc build -o dist/ build/report.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "npm run check && npm run build && npm run pack"
+    "build": "babel --out-dir build ./src",
+    "pack": "ncc build -s -o dist/ build/main.js",
+    "test": "jest",
+    "release": "npm run -s check && npm run -s build && npm run -s pack"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +27,10 @@
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-flow": "^7.8.3",
     "@zeit/ncc": "^0.21.1",
-    "flow-bin": "^0.118.0"
+    "flow-bin": "^0.118.0",
+    "jest": "^25.1.0",
+    "stdio": "^2.1.1",
+    "typescript": "^3.8.3"
   },
   "babel": {
     "presets": [

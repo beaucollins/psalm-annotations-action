@@ -1,4 +1,4 @@
-module.exports =
+require('./sourcemap-register.js');module.exports =
 /******/ (function(modules, runtime) { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	// The module cache
@@ -34,7 +34,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(108);
+/******/ 		return __webpack_require__(102);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -388,6 +388,83 @@ module.exports._enoent = enoent;
 
 /***/ }),
 
+/***/ 24:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function mapLevel(issue) {
+  switch (issue.severity) {
+    case 'info':
+      return 'warning';
+
+    case 'error':
+      return 'failure';
+
+    default:
+      {
+        return 'notice';
+      }
+  }
+}
+
+function mapAnnotation(pathPrefix = '') {
+  return issue => ({
+    path: issue.file_path.slice(pathPrefix.length),
+    annotation_level: mapLevel(issue),
+    start_line: issue.line_from,
+    end_line: issue.line_to,
+    message: issue.message,
+    start_column: issue.column_from,
+    end_column: issue.column_to,
+    title: issue.type,
+    raw_details: issue.snippet
+  });
+}
+
+function createCheckRun(owner, repo, reportName, reportTitle, headSha, workingDirectory, issues) {
+  const mapper = mapAnnotation(workingDirectory);
+  return {
+    owner,
+    repo,
+    name: reportName,
+    head_sha: headSha,
+    status: 'completed',
+    conclusion: 'neutral',
+    output: {
+      title: reportTitle,
+      summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)',
+      annotations: issues.map(mapper)
+    }
+  };
+}
+
+function collectBuffers(stream) {
+  return new Promise((resolve, reject) => {
+    const buffers = [];
+    stream.on('data', data => {
+      buffers.push(data);
+    }).on('close', () => {
+      resolve(Buffer.concat(buffers));
+    }).on('error', reject).resume();
+  });
+}
+
+const reporter = async options => {
+  return createCheckRun(options.owner, options.repo, options.reportName, options.reportTitle, options.headSha, options.workspaceDirectory, (await collectBuffers(options.reportContents).then(buffer => JSON.parse(buffer.toString('utf8')))));
+};
+
+var _default = reporter;
+exports.default = _default;
+
+/***/ }),
+
 /***/ 39:
 /***/ (function(module) {
 
@@ -485,7 +562,7 @@ module.exports = require("os");
 
 /***/ }),
 
-/***/ 108:
+/***/ 102:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
@@ -494,22 +571,25 @@ module.exports = require("os");
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createCheckRun = createCheckRun;
 exports.octokit = void 0;
 
-const core = __webpack_require__(470);
+var _core = __webpack_require__(470);
 
-const github = __webpack_require__(469);
+__webpack_require__(469);
 
-const {
-  readFile
-} = __webpack_require__(747);
+var _fs = __webpack_require__(747);
 
-const {
-  Octokit
-} = __webpack_require__(725);
+var _action = __webpack_require__(725);
 
-const octokit = new Octokit();
+var _path = __webpack_require__(622);
+
+var _psalm = _interopRequireDefault(__webpack_require__(24));
+
+var _typescript = _interopRequireDefault(__webpack_require__(290));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const octokit = new _action.Octokit();
 exports.octokit = octokit;
 
 try {
@@ -520,10 +600,40 @@ try {
   }
 
   const [owner, repo] = repository.split('/');
-  const path = core.getInput('report_path');
-  main(path).then(buffer => JSON.parse(buffer.toString('utf-8'))).then(createCheckRun(owner, repo)).then(result => console.log('success', result), error => core.setFailed(error.message));
+  const path = (0, _core.getInput)('report_path');
+  const headSha = process.env['GITHUB_SHA'];
+  const workspaceDirectory = process.env['GITHUB_WORKSPACE'];
+  const relativeDirectory = (0, _core.getInput)('src_directory');
+
+  if (headSha == null) {
+    throw new Error('GITHUB_SHA no present');
+  }
+
+  if (workspaceDirectory == null) {
+    throw new Error('GITHUB_WORKSPACE not present');
+  }
+
+  const reporter = selectReporter((0, _core.getInput)('report_type'));
+
+  if (!reporter) {
+    throw new Error('Unknown report type: ' + (0, _core.getInput)('report_type'));
+  }
+
+  Promise.resolve((0, _fs.createReadStream)(path, {
+    autoClose: true,
+    emitClose: true
+  }).pause()).then(stream => reporter({
+    owner,
+    repo,
+    reportName: (0, _core.getInput)('report_name'),
+    reportTitle: (0, _core.getInput)('report_title'),
+    headSha,
+    workspaceDirectory: trailingSlash(workspaceDirectory),
+    relativeDirectory,
+    reportContents: stream
+  })).then(octokit.checks.create).then(result => console.log('success', result.data.url), error => (0, _core.setFailed)(error.message));
 } catch (error) {
-  core.setFailed(error.message);
+  (0, _core.setFailed)(error.message);
 }
 
 function main(path) {
@@ -532,7 +642,7 @@ function main(path) {
 
 function readContents(path) {
   return new Promise((resolve, reject) => {
-    readFile(path, (error, data) => {
+    (0, _fs.readFile)(path, (error, data) => {
       if (error != null) {
         reject(error);
         return;
@@ -542,61 +652,6 @@ function readContents(path) {
     });
   });
 }
-/**
- * https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
- */
-
-
-function createCheckRun(owner, repo) {
-  const mapper = mapAnnotation(trailingSlash(process.env['GITHUB_WORKSPACE']));
-  return issues => {
-    return octokit.checks.create({
-      owner,
-      repo,
-      name: 'psalm',
-      head_sha: process.env['GITHUB_SHA'],
-      status: 'completed',
-      conclusion: 'neutral',
-      output: {
-        title: 'Psalm PHP Static Analysis',
-        summary: 'PHP Static type Analysis by [Psalm](http://psalm.dev)',
-        annotations: issues.map(mapper)
-      }
-    });
-  };
-}
-
-function mapLevel(issue) {
-  switch (issue.severity) {
-    case 'info':
-      return 'warning';
-
-    case 'error':
-      return 'failure';
-
-    default:
-      {
-        return 'notice';
-      }
-  }
-}
-
-function mapAnnotation(pathPrefix = '') {
-  return issue => {
-    const path = issue.file_path.slice(pathPrefix.length);
-    console.log('remove', pathPrefix, 'from', issue.file_path, path);
-    return {
-      path,
-      annotation_level: mapLevel(issue),
-      start_line: issue.line_from,
-      end_line: issue.line_to,
-      message: issue.message,
-      start_column: issue.column_from,
-      end_column: issue.column_to,
-      title: issue.type
-    };
-  };
-}
 
 function trailingSlash($path) {
   if ($path == null) {
@@ -604,6 +659,21 @@ function trailingSlash($path) {
   }
 
   return $path.slice(-1) === '/' ? $path : $path + '/';
+}
+
+function selectReporter(type) {
+  switch (type) {
+    case 'typescript':
+      {
+        return _typescript.default;
+      }
+
+    case 'psalm':
+    default:
+      {
+        return _psalm.default;
+      }
+  }
 }
 
 /***/ }),
@@ -4018,6 +4088,116 @@ function coerce (version) {
     '.' + (match[3] || '0'))
 }
 
+
+/***/ }),
+
+/***/ 290:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _path = __webpack_require__(622);
+
+const errorPattern = /([^(]{1,})\(([\d]{1,}),([\d]{1,})\):([^:]{1,}):(.*)/i;
+
+function read(onLine, stream) {
+  return new Promise((resolve, reject) => {
+    stream.once('readable', async () => {
+      let buffer;
+
+      while (buffer = stream.read()) {
+        if (buffer instanceof Buffer) {
+          buffer = buffer.toString('utf8');
+        }
+
+        const lines = buffer.split('\n');
+
+        for (const line of lines) {
+          await onLine(line);
+        }
+      }
+
+      resolve([]);
+    });
+  });
+}
+
+function mapIssue(issue) {
+  return {
+    path: issue.path,
+    annotation_level: 'failure',
+    start_line: issue.line,
+    end_line: issue.line,
+    message: issue.message,
+    start_column: issue.column,
+    end_column: issue.column,
+    raw_details: issue.full.concat(issue.extra ? issue.extra : '')
+  };
+}
+
+function parseReport(stream, relativeDirectory) {
+  const annotations = [];
+  let issue = null;
+  return read(async line => {
+    let match;
+
+    if (match = errorPattern.exec(line)) {
+      if (issue) {
+        annotations.push(mapIssue(issue));
+      }
+
+      const [full, file, line, column, code, message] = match;
+      issue = {
+        full,
+        line: parseInt(line),
+        column: parseInt(column),
+        path: (0, _path.join)(relativeDirectory, file),
+        message: message.trim(),
+        code: code.trim()
+      };
+    } else if (issue) {
+      issue = { ...issue,
+        extra: issue.extra ? issue.extra.concat(line) : line
+      };
+    }
+  }, stream).then(stats => {
+    if (issue) {
+      annotations.push(mapIssue(issue));
+    }
+
+    return annotations;
+  });
+}
+
+const reporter = async options => {
+  const {
+    repo,
+    owner,
+    headSha: head_sha
+  } = options;
+  return {
+    repo,
+    owner,
+    head_sha,
+    name: options.reportName,
+    status: 'completed',
+    conclusion: 'neutral',
+    output: {
+      title: options.reportTitle,
+      summary: 'TypeScript Report',
+      annotations: await parseReport(options.reportContents, options.relativeDirectory)
+    }
+  };
+};
+
+var _default = reporter;
+exports.default = _default;
 
 /***/ }),
 
@@ -25603,3 +25783,4 @@ function onceStrict (fn) {
 /***/ })
 
 /******/ });
+//# sourceMappingURL=index.js.map
