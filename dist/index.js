@@ -4125,12 +4125,13 @@ function mapIssue(issue) {
   return {
     path: issue.path,
     annotation_level: 'failure',
-    message: issue.message,
-    title: issue.message,
-    raw_details: issue.full.concat(issue.extra ? issue.extra : ''),
     start_line: issue.line,
     end_line: issue.line,
-    start_column: issue.column
+    message: issue.message,
+    start_column: issue.column,
+    end_column: issue.column,
+    title: issue.message,
+    raw_details: issue.full.concat(issue.extra ? issue.extra : '')
   };
 }
 

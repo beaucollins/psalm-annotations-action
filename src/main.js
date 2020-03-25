@@ -6,7 +6,9 @@ import '@actions/github';
 import { readFile, createReadStream } from 'fs';
 import { Octokit } from '@octokit/action';
 
-import createCheck from './psalm';
+import type { Reporter } from './reporter';
+import psalm from './psalm';
+import typescript from './typescript';
 
 export const octokit = new Octokit();
 
@@ -29,8 +31,14 @@ try {
         throw new Error('GITHUB_WORKSPACE not present');
     }
 
-    Promise.resolve(createReadStream(path))
-        .then((stream) => createCheck({
+    const reporter = selectReporter(getInput('report_type'));
+
+    if (!reporter) {
+        throw new Error('Unknown report type: ' + getInput('report_type'));
+    }
+
+    Promise.resolve(createReadStream(path, {autoClose: true, emitClose: true}).pause())
+        .then((stream) => reporter({
             owner,
             repo,
             reportName: getInput('report_name'),
@@ -71,4 +79,17 @@ function trailingSlash($path: void | null | string): string {
     }
 
     return $path.slice(-1) === '/' ? $path : $path + '/';
+}
+
+
+function selectReporter(type: string): ?Reporter {
+    switch(type) {
+        case 'typescript': {
+            return typescript;
+        }
+        case 'psalm':
+        default: {
+            return psalm
+        }
+    }
 }

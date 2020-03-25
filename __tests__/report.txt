@@ -1,0 +1,11 @@
+src/example.ts(9,9): error TS2345: Argument of type '"lol"' is not assignable to parameter of type 'Thing'.
+src/example.ts(11,9): error TS2345: Argument of type '1' is not assignable to parameter of type 'Thing'.
+src/blocks/container/controls.js(37,21): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: Props, context?: any): ReactElement<any, string | ((props: any) => ReactElement<any, string | ... | (new (props: any) => Component<any, any, any>)> | null) | (new (props: any) => Component<...>)> | Component<...> | null', gave the following error.
+    Type 'Element' is not assignable to type '"search" | "camera" | "microphone" | "clipboard" | "exit" | "hidden" | "button" | "html" | "menu" | "filter" | "marker" | "text" | "update" | "ellipsis" | "layout" | "move" | "sticky" | ... 272 more ... | undefined'.
+      Type 'Element' is not assignable to type '"yes-alt"'.
+  Overload 2 of 2, '(props: PropsWithChildren<Props>, context?: any): ReactElement<any, string | ((props: any) => ReactElement<any, string | ... | (new (props: any) => Component<any, any, any>)> | null) | (new (props: any) => Component<...>)> | Component<...> | null', gave the following error.
+    Type 'Element' is not assignable to type '"search" | "camera" | "microphone" | "clipboard" | "exit" | "hidden" | "button" | "html" | "menu" | "filter" | "marker" | "text" | "update" | "ellipsis" | "layout" | "move" | "sticky" | ... 272 more ... | undefined'.
+      Type 'Element' is not assignable to type '"yes-alt"'.
+ src/example.ts(9,9): error TS2345: Argument of type '"lol"' is not assignable to parameter of type 'Thing'.
+ src/example.ts(11,9): error TS2345: Argument of type '1' is not assignable to parameter of type 'Thing'.

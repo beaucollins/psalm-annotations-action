@@ -15,6 +15,11 @@ inputs:
     required: false
     default: Psalm PHP Static Analysis
 
+  report_type:
+    description: Report generator type
+    required: false
+    default: psalm
+
 runs:
   using: 'node12'
   main: 'dist/index.js'

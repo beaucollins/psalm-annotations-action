@@ -75,13 +75,15 @@ function createCheckRun(
 function collectBuffers(stream): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         const buffers: Buffer[] = [];
-        stream.on('data', (data) => {
-            buffers.push(data);
-        });
-        stream.on('close', () => {
-            resolve(Buffer.concat(buffers));
-        })
-        stream.on('error', reject);
+        stream
+            .on('data', (data) => {
+                buffers.push(data);
+            })
+            .on('close', () => {
+                resolve(Buffer.concat(buffers));
+            })
+            .on('error', reject)
+            .resume();
     })
 }
 
