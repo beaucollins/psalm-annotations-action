@@ -53,4 +53,5 @@ jobs:
         report_title: tsc
         report_path: ./example-ts/report.txt
         report_type: typescript
+        src_directory: example-ts
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
