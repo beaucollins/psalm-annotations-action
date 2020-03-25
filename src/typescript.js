@@ -2,6 +2,7 @@
  * @flow
  */
 import type { Reporter, Annotation } from './reporter';
+import { join } from 'path';
 
 const errorPattern = /([^(]{1,})\(([\d]{1,}),([\d]{1,})\):([^:]{1,}):(.*)/i
 
@@ -47,7 +48,7 @@ function mapIssue(issue): Annotation {
 	};
 }
 
-function parseReport(stream): Promise<Annotation[]> {
+function parseReport(stream, relativeDirectory): Promise<Annotation[]> {
 	const annotations: Annotation[] = [];
 	let issue: ?Issue = null;
 	return read(
@@ -62,7 +63,7 @@ function parseReport(stream): Promise<Annotation[]> {
 					full,
 					line: parseInt(line),
 					column: parseInt(column),
-					path: file,
+					path: join(relativeDirectory, file),
 					message: message.trim(),
 					code: code.trim(),
 				};
@@ -98,7 +99,7 @@ const reporter: Reporter = async (options) => {
 		output: {
 			title: options.reportTitle,
 			summary: 'TypeScript Report',
-			annotations: await parseReport(options.reportContents)
+			annotations: await parseReport(options.reportContents, options.relativeDirectory)
 		}
 	};
 }

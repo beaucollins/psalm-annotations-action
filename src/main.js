@@ -5,6 +5,7 @@ import { setFailed, getInput } from '@actions/core';
 import '@actions/github';
 import { readFile, createReadStream } from 'fs';
 import { Octokit } from '@octokit/action';
+import { join } from 'path';
 
 import type { Reporter } from './reporter';
 import psalm from './psalm';
@@ -22,6 +23,8 @@ try {
     const path = getInput('report_path');
     const headSha = process.env['GITHUB_SHA'];
     const workspaceDirectory = process.env['GITHUB_WORKSPACE'];
+
+    const relativeDirectory = getInput('src_directory');
 
     if (headSha == null) {
         throw new Error('GITHUB_SHA no present');
@@ -45,6 +48,7 @@ try {
             reportTitle: getInput('report_title'),
             headSha,
             workspaceDirectory: trailingSlash(workspaceDirectory),
+            relativeDirectory,
             reportContents: stream,
         }))
         .then(octokit.checks.create)

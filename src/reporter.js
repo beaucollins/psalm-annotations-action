@@ -62,8 +62,9 @@ type Options = {|
 	reportName: string,
 	reportTitle: string,
 	workspaceDirectory: string,
+    relativeDirectory: string,
 	headSha: string,
-	reportContents: ReadStream,
+    reportContents: ReadStream,
 |}
 
 export type Reporter = (Options) => (Promise<Check> | Check);
