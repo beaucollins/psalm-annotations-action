@@ -581,6 +581,8 @@ var _fs = __webpack_require__(747);
 
 var _action = __webpack_require__(725);
 
+var _path = __webpack_require__(622);
+
 var _psalm = _interopRequireDefault(__webpack_require__(24));
 
 var _typescript = _interopRequireDefault(__webpack_require__(290));
@@ -601,6 +603,7 @@ try {
   const path = (0, _core.getInput)('report_path');
   const headSha = process.env['GITHUB_SHA'];
   const workspaceDirectory = process.env['GITHUB_WORKSPACE'];
+  const relativeDirectory = (0, _core.getInput)('src_directory');
 
   if (headSha == null) {
     throw new Error('GITHUB_SHA no present');
@@ -626,8 +629,14 @@ try {
     reportTitle: (0, _core.getInput)('report_title'),
     headSha,
     workspaceDirectory: trailingSlash(workspaceDirectory),
+    relativeDirectory,
     reportContents: stream
-  })).then(octokit.checks.create).then(result => console.log('success', result), error => (0, _core.setFailed)(error.message));
+  })).then(octokit.checks.create).then(async created => {
+    console.log('checks', (await octokit.checks.listForRef({
+      ref: headSha
+    })));
+    return created;
+  }).then(result => console.log('success', result), error => (0, _core.setFailed)(error.message));
 } catch (error) {
   (0, _core.setFailed)(error.message);
 }
@@ -4088,7 +4097,7 @@ function coerce (version) {
 /***/ }),
 
 /***/ 290:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -4097,6 +4106,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _path = __webpack_require__(622);
+
 const errorPattern = /([^(]{1,})\(([\d]{1,}),([\d]{1,})\):([^:]{1,}):(.*)/i;
 
 function read(onLine, stream) {
@@ -4135,7 +4147,7 @@ function mapIssue(issue) {
   };
 }
 
-function parseReport(stream) {
+function parseReport(stream, relativeDirectory) {
   const annotations = [];
   let issue = null;
   return read(async line => {
@@ -4151,7 +4163,7 @@ function parseReport(stream) {
         full,
         line: parseInt(line),
         column: parseInt(column),
-        path: file,
+        path: (0, _path.join)(relativeDirectory, file),
         message: message.trim(),
         code: code.trim()
       };
@@ -4185,7 +4197,7 @@ const reporter = async options => {
     output: {
       title: options.reportTitle,
       summary: 'TypeScript Report',
-      annotations: await parseReport(options.reportContents)
+      annotations: await parseReport(options.reportContents, options.relativeDirectory)
     }
   };
 };

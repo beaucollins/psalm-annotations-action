@@ -20,6 +20,11 @@ inputs:
     required: false
     default: psalm
 
+  src_directory:
+    description: 'Root directory for report paths'
+    required: false
+    default: ''
+
 runs:
   using: 'node12'
   main: 'dist/index.js'
