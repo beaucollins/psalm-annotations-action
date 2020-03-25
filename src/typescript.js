@@ -43,7 +43,7 @@ function mapIssue(issue): Annotation {
 		message: issue.message,
 		start_column: issue.column,
 		end_column: issue.column,
-		raw_details: issue.full.concat(issue.extra ? issue.extra : ''),
+		raw_details: issue.extra ? issue.full.concat( "\n", issue.extra ) : issue.full,
 	};
 }
 
@@ -69,7 +69,7 @@ function parseReport(stream, relativeDirectory): Promise<Annotation[]> {
 			} else if (issue) {
 				issue = {
 					...issue,
-					extra: issue.extra ? issue.extra.concat(line) : line
+					extra: issue.extra ? issue.extra.concat("\n", line) : line
 				};
 			}
 		},

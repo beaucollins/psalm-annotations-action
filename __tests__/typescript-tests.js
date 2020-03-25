@@ -9,7 +9,8 @@ describe('typescript report', () => {
 			headSha: 'some-sha',
 			reportTitle: 'some title',
 			reportName: 'tsc',
-			reportContents: createReadStream(__dirname + '/report.txt')
+			reportContents: createReadStream(__dirname + '/report.txt'),
+			relativeDirectory: 'some/path',
 		});
 
 		expect(report).toEqual({
