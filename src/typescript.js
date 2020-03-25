@@ -43,7 +43,6 @@ function mapIssue(issue): Annotation {
 		message: issue.message,
 		start_column: issue.column,
 		end_column: issue.column,
-		title: issue.message,
 		raw_details: issue.full.concat(issue.extra ? issue.extra : ''),
 	};
 }
