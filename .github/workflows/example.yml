@@ -49,6 +49,7 @@ jobs:
       if: always()
       uses: beaucollins/psalm-annotations-action@options
       with:
+        report_name: tsc
         report_title: tsc
         report_path: ./example-ts/report.txt
         report_type: typescript
