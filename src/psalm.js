@@ -2,6 +2,7 @@
  * @flow
  */
 import type { Annotation, Check, Reporter } from './reporter';
+import { parseJsonStream } from './collect-buffers';
 
 type Issue = {|
     severity: 'info' | 'error',
@@ -72,21 +73,6 @@ function createCheckRun(
 	}
 }
 
-function collectBuffers(stream): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        const buffers: Buffer[] = [];
-        stream
-            .on('data', (data) => {
-                buffers.push(data);
-            })
-            .on('close', () => {
-                resolve(Buffer.concat(buffers));
-            })
-            .on('error', reject)
-            .resume();
-    })
-}
-
 const reporter: Reporter = async (options) => {
 	return createCheckRun(
 		options.owner,
@@ -95,7 +81,7 @@ const reporter: Reporter = async (options) => {
 		options.reportTitle,
 		options.headSha,
 		options.workspaceDirectory,
-		await collectBuffers(options.reportContents).then((buffer) => JSON.parse(buffer.toString('utf8')))
+		await parseJsonStream(options.reportContents)
 	);
 }
 

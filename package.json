@@ -11,7 +11,7 @@
     "build": "babel --out-dir build ./src",
     "pack": "ncc build -s -o dist/ build/main.js",
     "test": "jest",
-    "release": "npm run -s check && npm run -s build && npm run -s pack"
+    "release": "npm run -s check && npm run -s test && npm run -s build && npm run -s pack"
   },
   "keywords": [],
   "author": "",

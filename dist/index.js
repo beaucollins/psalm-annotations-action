@@ -389,7 +389,7 @@ module.exports._enoent = enoent;
 /***/ }),
 
 /***/ 24:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -398,6 +398,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _collectBuffers = __webpack_require__(711);
 
 function mapLevel(issue) {
   switch (issue.severity) {
@@ -445,19 +447,8 @@ function createCheckRun(owner, repo, reportName, reportTitle, headSha, workingDi
   };
 }
 
-function collectBuffers(stream) {
-  return new Promise((resolve, reject) => {
-    const buffers = [];
-    stream.on('data', data => {
-      buffers.push(data);
-    }).on('close', () => {
-      resolve(Buffer.concat(buffers));
-    }).on('error', reject).resume();
-  });
-}
-
 const reporter = async options => {
-  return createCheckRun(options.owner, options.repo, options.reportName, options.reportTitle, options.headSha, options.workspaceDirectory, (await collectBuffers(options.reportContents).then(buffer => JSON.parse(buffer.toString('utf8')))));
+  return createCheckRun(options.owner, options.repo, options.reportName, options.reportTitle, options.headSha, options.workspaceDirectory, (await (0, _collectBuffers.parseJsonStream)(options.reportContents)));
 };
 
 var _default = reporter;
@@ -587,6 +578,8 @@ var _psalm = _interopRequireDefault(__webpack_require__(24));
 
 var _typescript = _interopRequireDefault(__webpack_require__(290));
 
+var _eslint = _interopRequireDefault(__webpack_require__(275));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const octokit = new _action.Octokit();
@@ -666,6 +659,11 @@ function selectReporter(type) {
     case 'typescript':
       {
         return _typescript.default;
+      }
+
+    case 'eslint':
+      {
+        return _eslint.default;
       }
 
     case 'psalm':
@@ -2603,6 +2601,63 @@ function applyAcceptHeader (res, headers) {
   return headers
 }
 
+
+/***/ }),
+
+/***/ 275:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _collectBuffers = __webpack_require__(711);
+
+const parseJson = () => {};
+
+const reporter = async options => {
+  return {
+    owner: options.owner,
+    repo: options.repo,
+    name: options.reportName,
+    head_sha: options.headSha,
+    status: 'completed',
+    conclusion: 'neutral',
+    output: {
+      title: options.reportTitle,
+      summary: '',
+      annotations: await createAnnotations(options.reportContents)
+    }
+  };
+};
+
+async function createAnnotations(stream) {
+  const json = await (0, _collectBuffers.parseJsonStream)(stream);
+  return json.reduce((annotations, file) => {
+    return [...annotations, ...file.messages.map(message => messageToAnnotation(file, message))];
+  }, []);
+}
+
+function messageToAnnotation(file, message) {
+  return {
+    title: message.ruleId + ' ' + message.message,
+    annotation_level: 'notice',
+    start_column: message.column,
+    end_column: message.endColumn,
+    start_line: message.start_line,
+    end_line: message.endLine,
+    path: file.filePath,
+    raw_details: JSON.stringify(message, null, ' '),
+    message: message.message
+  };
+}
+
+var _default = reporter;
+exports.default = _default;
 
 /***/ }),
 
@@ -9099,6 +9154,35 @@ module.exports = (promise, onFinally) => {
 	);
 };
 
+
+/***/ }),
+
+/***/ 711:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = collectBuffers;
+exports.parseJsonStream = parseJsonStream;
+
+function collectBuffers(stream) {
+  return new Promise((resolve, reject) => {
+    const buffers = [];
+    stream.on('data', data => {
+      buffers.push(data);
+    }).on('close', () => {
+      resolve(Buffer.concat(buffers));
+    }).on('error', reject).resume();
+  });
+}
+
+function parseJsonStream(stream) {
+  return collectBuffers(stream).then(buffer => JSON.parse(buffer.toString('utf8')));
+}
 
 /***/ }),
 

@@ -10,6 +10,7 @@ import { join } from 'path';
 import type { Reporter } from './reporter';
 import psalm from './psalm';
 import typescript from './typescript';
+import eslint from './eslint';
 
 export const octokit = new Octokit();
 
@@ -90,6 +91,9 @@ function selectReporter(type: string): ?Reporter {
     switch(type) {
         case 'typescript': {
             return typescript;
+        }
+        case 'eslint': {
+            return eslint;
         }
         case 'psalm':
         case '': {
