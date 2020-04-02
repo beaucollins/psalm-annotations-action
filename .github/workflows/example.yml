@@ -62,21 +62,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: npm install
-      run: npm install
-      working-directory: ./example-js
-
-    - name: ESLint
-      run: npm run lint -- --format json --output-file ./report.json
-      working-directory: ./example-js
-
     - name: Report Failures
       if: always()
       uses: beaucollins/psalm-annotations-action@v1.1.3-alpha11
       with:
         report_name: eslint
         report_title: ESLint
-        report_path: ./example-js/report.json
-        src_directory: example-js
+        report_path: ./__tests__/eslint-large.json
         report_type: eslint
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
