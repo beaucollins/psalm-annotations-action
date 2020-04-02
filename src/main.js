@@ -71,14 +71,14 @@ try {
 
             while(remaining.length > 0) {
                 await octokit.checks.update({
-                    check_run_id: checkRun.id,
+                    check_run_id: checkRun.data.id,
                     output: { annotations: remaining.slice(0, 50)}
                 });
                 remaining = remaining.slice(50);
             }
 
             await octokit.checks.update({
-                check_run_id: checkRun.id,
+                check_run_id: checkRun.data.id,
                 status: 'completed',
             });
 
