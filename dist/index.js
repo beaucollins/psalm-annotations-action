@@ -631,7 +631,6 @@ try {
     let remaining = annotations.slice(1);
     console.log('total annotations', annotations.length);
     const checkRun = await octokit.checks.create({ ...report,
-      status: 'in_progress',
       output: { ...report.output,
         annotations: initial
       }
@@ -646,7 +645,6 @@ try {
         owner: report.owner,
         repo: report.repo,
         check_run_id: checkRun.data.id,
-        status: 'in_progress',
         output: { ...report.output,
           annotations: next
         }
@@ -654,14 +652,6 @@ try {
       remaining = remaining.slice(1);
       console.log('remaining', remaining.length);
     }
-
-    console.log('completing');
-    await octokit.checks.update({
-      owner: report.owner,
-      repo: report.repo,
-      check_run_id: checkRun.data.id,
-      conclusion: 'neutral'
-    });
   }).then(octokit.checks.create).then(result => console.log('success', result.data.url), error => (0, _core.setFailed)(error.message));
 } catch (error) {
   (0, _core.setFailed)(error.message);
