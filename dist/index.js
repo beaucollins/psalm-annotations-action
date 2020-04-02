@@ -629,6 +629,7 @@ try {
     const annotations = report.output.annotations.slice();
     const initial = annotations.slice(0, 50);
     let remaining = annotations.slice(50);
+    console.log('initial annotations', initial.length, initial);
     const checkRun = await octokit.checks.create({ ...report,
       status: 'in_progress',
       output: { ...report.output,
@@ -638,6 +639,7 @@ try {
 
     while (remaining.length > 0) {
       const next = remaining.slice(0, 50);
+      console.log('sending annotations', next.length, next);
       await octokit.checks.update({
         owner: report.owner,
         repo: report.repo,
