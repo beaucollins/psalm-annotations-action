@@ -92,8 +92,11 @@ function selectReporter(type: string): ?Reporter {
             return typescript;
         }
         case 'psalm':
-        default: {
+        case '': {
             return psalm
+        }
+        default: {
+            throw new Error('Reporter not known ' + type);
         }
     }
 }
