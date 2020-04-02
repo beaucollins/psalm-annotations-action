@@ -24,7 +24,7 @@ jobs:
 
     - name: Report Failures
       if: always()
-      uses: beaucollins/psalm-annotations-action@options
+      uses: beaucollins/psalm-annotations-action@eslint
       with:
         report_title: LOL
         report_path: ./example-php/report.json
@@ -47,11 +47,34 @@ jobs:
 
     - name: Report Failures
       if: always()
-      uses: beaucollins/psalm-annotations-action@options
+      uses: beaucollins/psalm-annotations-action@eslint
       with:
         report_name: tsc
         report_title: tsc
         report_path: ./example-ts/report.txt
         report_type: typescript
         src_directory: example-ts
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  javascript:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: npm install
+      run: npm install
+      working-directory: ./example-js
+
+    - name: ESLint
+      run: npm run lint -- --format json --output-file ./report.json
+
+    - name: Report Failures
+      if: always()
+      uses: beaucollins/psalm-annotations-action@eslint
+      with:
+        report_name: eslint
+        report_title: ESLint
+        report_path: ./example-js/report.json
+        src_directory: example-js
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
