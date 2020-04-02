@@ -639,6 +639,8 @@ try {
 
     while (remaining.length > 0) {
       await octokit.checks.update({
+        owner: report.owner,
+        repo: report.repo,
         check_run_id: checkRun.data.id,
         output: {
           annotations: remaining.slice(0, 50)
@@ -649,6 +651,8 @@ try {
 
     await octokit.checks.update({
       check_run_id: checkRun.data.id,
+      owner: report.owner,
+      repo: report.repo,
       status: 'completed'
     });
   }).then(octokit.checks.create).then(result => console.log('success', result.data.url), error => (0, _core.setFailed)(error.message));

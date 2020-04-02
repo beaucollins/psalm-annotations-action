@@ -71,6 +71,8 @@ try {
 
             while(remaining.length > 0) {
                 await octokit.checks.update({
+                    owner: report.owner,
+                    repo: report.repo,
                     check_run_id: checkRun.data.id,
                     output: { annotations: remaining.slice(0, 50)}
                 });
@@ -79,6 +81,8 @@ try {
 
             await octokit.checks.update({
                 check_run_id: checkRun.data.id,
+                owner: report.owner,
+                repo: report.repo,
                 status: 'completed',
             });
 
