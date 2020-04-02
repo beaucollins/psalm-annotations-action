@@ -78,4 +78,5 @@ jobs:
         report_title: ESLint
         report_path: ./example-js/report.json
         src_directory: example-js
+        report_type: eslint
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
