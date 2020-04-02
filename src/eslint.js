@@ -26,6 +26,7 @@ const reporter: Reporter = async (options) => {
 
 async function createAnnotations(stream): Promise<Annotation[]> {
 	const json = await parseJsonStream(stream);
+	console.log('creating report from ', json);
 	return json.reduce((annotations: Annotation[], file): Annotation[] => {
 		return [...annotations, ...file.messages.map(message => messageToAnnotation(file, message))];
 	}, []);

@@ -2637,6 +2637,7 @@ const reporter = async options => {
 
 async function createAnnotations(stream) {
   const json = await (0, _collectBuffers.parseJsonStream)(stream);
+  console.log('creating report from ', json);
   return json.reduce((annotations, file) => {
     return [...annotations, ...file.messages.map(message => messageToAnnotation(file, message))];
   }, []);
