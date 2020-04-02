@@ -56,7 +56,9 @@ try {
             // make a request for every 50 annotations, first one to create the report, remaining to update it
             const annotations = report.output.annotations.slice();
             const initial = annotations.slice(0, 1);
-            let remaining = annotations.slice(1, 0);
+            let remaining = annotations.slice(1);
+
+            console.log('total annotations', annotations.length);
 
             const checkRun = await octokit.checks.create({
                 ...report,
@@ -90,10 +92,9 @@ try {
             console.log('completing');
 
             await octokit.checks.update({
-                check_run_id: checkRun.data.id,
                 owner: report.owner,
                 repo: report.repo,
-                completed_at: (new Date()).toISOString(),
+                check_run_id: checkRun.data.id,
                 conclusion: 'neutral',
             });
 
