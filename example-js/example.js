@@ -1,0 +1,4 @@
+/**
+ *
+ */
+const thing = "hi";

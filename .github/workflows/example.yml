@@ -68,6 +68,7 @@ jobs:
 
     - name: ESLint
       run: npm run lint -- --format json --output-file ./report.json
+      working-directory: ./example-js
 
     - name: Report Failures
       if: always()
