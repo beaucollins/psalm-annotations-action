@@ -32,17 +32,26 @@ async function createAnnotations(stream, prefix): Promise<Annotation[]> {
 }
 
 function messageToAnnotation(file, message, prefix): Annotation {
-	return {
+	const base: Annotation = {
 		title: message.ruleId,
 		annotation_level: noticeLevel(message.severity),
-		start_column: message.column,
-		end_column: message.endColumn,
 		start_line: message.line,
-		end_line: message.endLine,
+		end_line: message.endLine ?? message.line,
 		path: file.filePath.slice(prefix.length),
 		raw_details: JSON.stringify(message, null, ' '),
 		message: message.message,
 	};
+	const columns: ?({|start_column: number, end_column: number|}) = message.column && message.endColumn
+		? {
+			start_column: message.column,
+			end_column: message.endColumn,
+		}
+		: null;
+
+	if (columns) {
+		return {...base, ...columns};
+	}
+	return base;
 }
 
 function noticeLevel(severity) {

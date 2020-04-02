@@ -624,7 +624,33 @@ try {
     workspaceDirectory: trailingSlash(workspaceDirectory),
     relativeDirectory,
     reportContents: stream
-  })).then(octokit.checks.create).then(result => console.log('success', result.data.url), error => (0, _core.setFailed)(error.message));
+  })).then(async report => {
+    // make a request for every 50 annotations, first one to create the report, remaining to update it
+    const annotations = report.output.annotations.slice();
+    const initial = annotations.slice(0, 50);
+    let remaining = annotations.slice(50, 0);
+    const checkRun = await octokit.checks.create({ ...report,
+      status: 'in_progress',
+      output: { ...report.output,
+        annotations: initial
+      }
+    });
+
+    while (remaining.length > 0) {
+      await octokit.checks.update({
+        check_run_id: checkRun.id,
+        output: {
+          annotations: remaining.slice(0, 50)
+        }
+      });
+      remaining = remaining.slice(50);
+    }
+
+    await octokit.checks.update({
+      check_run_id: checkRun.id,
+      status: 'completed'
+    });
+  }).then(octokit.checks.create).then(result => console.log('success', result.data.url), error => (0, _core.setFailed)(error.message));
 } catch (error) {
   (0, _core.setFailed)(error.message);
 }
@@ -2643,17 +2669,29 @@ async function createAnnotations(stream, prefix) {
 }
 
 function messageToAnnotation(file, message, prefix) {
-  return {
+  var _message$endLine;
+
+  const base = {
     title: message.ruleId,
     annotation_level: noticeLevel(message.severity),
-    start_column: message.column,
-    end_column: message.endColumn,
     start_line: message.line,
-    end_line: message.endLine,
+    end_line: (_message$endLine = message.endLine) !== null && _message$endLine !== void 0 ? _message$endLine : message.line,
     path: file.filePath.slice(prefix.length),
     raw_details: JSON.stringify(message, null, ' '),
     message: message.message
   };
+  const columns = message.column && message.endColumn ? {
+    start_column: message.column,
+    end_column: message.endColumn
+  } : null;
+
+  if (columns) {
+    return { ...base,
+      ...columns
+    };
+  }
+
+  return base;
 }
 
 function noticeLevel(severity) {

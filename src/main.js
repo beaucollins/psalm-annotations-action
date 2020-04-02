@@ -52,6 +52,35 @@ try {
             relativeDirectory,
             reportContents: stream,
         }))
+        .then(async report => {
+            // make a request for every 50 annotations, first one to create the report, remaining to update it
+            const annotations = report.output.annotations.slice();
+            const initial = annotations.slice(0, 50);
+            let remaining = annotations.slice(50, 0);
+
+            const checkRun = await octokit.checks.create({
+                ...report,
+                status: 'in_progress',
+                output: {
+                    ...report.output,
+                    annotations: initial
+                }
+            });
+
+            while(remaining.length > 0) {
+                await octokit.checks.update({
+                    check_run_id: checkRun.id,
+                    output: { annotations: remaining.slice(0, 50)}
+                });
+                remaining = remaining.slice(50);
+            }
+
+            await octokit.checks.update({
+                check_run_id: checkRun.id,
+                status: 'completed',
+            });
+
+        })
         .then(octokit.checks.create)
         .then(
             (result: any) => console.log('success', result.data.url),
