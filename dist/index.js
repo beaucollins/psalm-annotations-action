@@ -2630,27 +2630,27 @@ const reporter = async options => {
     output: {
       title: options.reportTitle,
       summary: '',
-      annotations: await createAnnotations(options.reportContents)
+      annotations: await createAnnotations(options.reportContents, options.workspaceDirectory)
     }
   };
 };
 
-async function createAnnotations(stream) {
+async function createAnnotations(stream, prefix) {
   const json = await (0, _collectBuffers.parseJsonStream)(stream);
   return json.reduce((annotations, file) => {
-    return [...annotations, ...file.messages.map(message => messageToAnnotation(file, message))];
+    return [...annotations, ...file.messages.map(message => messageToAnnotation(file, message, prefix))];
   }, []);
 }
 
-function messageToAnnotation(file, message) {
+function messageToAnnotation(file, message, prefix) {
   return {
-    title: message.ruleId + ' ' + message.message,
+    title: message.ruleId,
     annotation_level: 'notice',
     start_column: message.column,
     end_column: message.endColumn,
     start_line: message.line,
     end_line: message.endLine,
-    path: file.filePath,
+    path: file.filePath.slice(prefix.length),
     raw_details: JSON.stringify(message, null, ' '),
     message: message.message
   };

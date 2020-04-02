@@ -11,6 +11,7 @@ describe('eslint', () => {
 			reportName: 'eslint',
 			reportContents: createReadStream(__dirname + '/eslint.json'),
 			relativeDirectory: 'eek/',
+			workspaceDirectory: '',
 		});
 
 		expect(report.repo).toEqual('repo');
