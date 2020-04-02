@@ -2645,7 +2645,7 @@ async function createAnnotations(stream, prefix) {
 function messageToAnnotation(file, message, prefix) {
   return {
     title: message.ruleId,
-    annotation_level: 'notice',
+    annotation_level: noticeLevel(message.severity),
     start_column: message.column,
     end_column: message.endColumn,
     start_line: message.line,
@@ -2654,6 +2654,25 @@ function messageToAnnotation(file, message, prefix) {
     raw_details: JSON.stringify(message, null, ' '),
     message: message.message
   };
+}
+
+function noticeLevel(severity) {
+  switch (severity) {
+    case 1:
+      {
+        return 'warning';
+      }
+
+    case 2:
+      {
+        return 'failure';
+      }
+
+    default:
+      {
+        return 'notice';
+      }
+  }
 }
 
 var _default = reporter;
