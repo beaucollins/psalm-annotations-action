@@ -13,18 +13,16 @@ describe('typescript report', () => {
 			relativeDirectory: 'some/path',
 		});
 
-		expect(report).toEqual({
-			repo: 'my-repo',
-			owner: 'some-owner',
-			head_sha: 'some-sha',
-			name: 'tsc',
-			status: 'completed',
-			conclusion: 'neutral',
-			output: {
-				annotations: [],
-				summary: 'TypeScript Report',
-				title: 'some title'
-			}
-		});
+		expect(report.repo).toBe('my-repo');
+		expect(report.owner).toBe('some-owner');
+		expect(report.head_sha).toBe('some-sha');
+		expect(report.name).toBe('tsc');
+		expect(report.status).toBe('completed');
+		expect(report.conclusion).toBe('neutral');
+
+		expect(report.output.summary).toBe('TypeScript Report');
+		expect(report.output.title).toBe('some title');
+
+		expect(report.output.annotations.length).toEqual(5);
 	});
 });

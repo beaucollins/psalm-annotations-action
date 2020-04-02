@@ -10,6 +10,7 @@ import { join } from 'path';
 import type { Reporter } from './reporter';
 import psalm from './psalm';
 import typescript from './typescript';
+import eslint from './eslint';
 
 export const octokit = new Octokit();
 
@@ -51,7 +52,49 @@ try {
             relativeDirectory,
             reportContents: stream,
         }))
-        .then(octokit.checks.create)
+        .then(async report => {
+            // make a request for every 50 annotations, first one to create the report, remaining to update it
+            const annotations = report.output.annotations.slice();
+            const initial = annotations.slice(0, 50);
+            let remaining = annotations.slice(50);
+
+            console.log('initial annotations', initial.length, initial);
+            const checkRun = await octokit.checks.create({
+                ...report,
+                status: 'in_progress',
+                output: {
+                    ...report.output,
+                    annotations: initial
+                }
+            });
+
+            while(remaining.length > 0) {
+                const next = remaining.slice(0, 50);
+                console.log('sending annotations', next.length, next);
+                await octokit.checks.update({
+                    owner: report.owner,
+                    repo: report.repo,
+                    check_run_id: checkRun.data.id,
+                    status: 'in_progress',
+                    output: {
+                        ...report.output,
+                        annotations: next,
+                    }
+                });
+                remaining = remaining.slice(50);
+            }
+
+            await octokit.checks.update({
+                owner: report.owner,
+                repo: report.repo,
+                check_run_id: checkRun.data.id,
+                conclusion: 'neutral',
+                output: {
+                    ...report.output,
+                    annotations: []
+                }
+            });
+        })
         .then(
             (result: any) => console.log('success', result.data.url),
             error => setFailed(error.message)
@@ -77,23 +120,28 @@ function readContents( path ): Promise<Buffer> {
     });
 }
 
-function trailingSlash($path: void | null | string): string {
-    if ( $path == null ) {
+function trailingSlash(path: void | null | string): string {
+    if ( path == null ) {
         return '';
     }
 
-    return $path.slice(-1) === '/' ? $path : $path + '/';
+    return path.slice(-1) === '/' ? path : path + '/';
 }
-
 
 function selectReporter(type: string): ?Reporter {
     switch(type) {
         case 'typescript': {
             return typescript;
         }
+        case 'eslint': {
+            return eslint;
+        }
         case 'psalm':
-        default: {
+        case '': {
             return psalm
+        }
+        default: {
+            throw new Error('Reporter not known ' + type);
         }
     }
 }

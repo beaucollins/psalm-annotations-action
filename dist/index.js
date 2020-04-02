@@ -389,7 +389,7 @@ module.exports._enoent = enoent;
 /***/ }),
 
 /***/ 24:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -398,6 +398,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _collectBuffers = __webpack_require__(711);
 
 function mapLevel(issue) {
   switch (issue.severity) {
@@ -445,19 +447,8 @@ function createCheckRun(owner, repo, reportName, reportTitle, headSha, workingDi
   };
 }
 
-function collectBuffers(stream) {
-  return new Promise((resolve, reject) => {
-    const buffers = [];
-    stream.on('data', data => {
-      buffers.push(data);
-    }).on('close', () => {
-      resolve(Buffer.concat(buffers));
-    }).on('error', reject).resume();
-  });
-}
-
 const reporter = async options => {
-  return createCheckRun(options.owner, options.repo, options.reportName, options.reportTitle, options.headSha, options.workspaceDirectory, (await collectBuffers(options.reportContents).then(buffer => JSON.parse(buffer.toString('utf8')))));
+  return createCheckRun(options.owner, options.repo, options.reportName, options.reportTitle, options.headSha, options.workspaceDirectory, (await (0, _collectBuffers.parseJsonStream)(options.reportContents)));
 };
 
 var _default = reporter;
@@ -587,6 +578,8 @@ var _psalm = _interopRequireDefault(__webpack_require__(24));
 
 var _typescript = _interopRequireDefault(__webpack_require__(290));
 
+var _eslint = _interopRequireDefault(__webpack_require__(275));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const octokit = new _action.Octokit();
@@ -631,7 +624,44 @@ try {
     workspaceDirectory: trailingSlash(workspaceDirectory),
     relativeDirectory,
     reportContents: stream
-  })).then(octokit.checks.create).then(result => console.log('success', result.data.url), error => (0, _core.setFailed)(error.message));
+  })).then(async report => {
+    // make a request for every 50 annotations, first one to create the report, remaining to update it
+    const annotations = report.output.annotations.slice();
+    const initial = annotations.slice(0, 50);
+    let remaining = annotations.slice(50);
+    console.log('initial annotations', initial.length, initial);
+    const checkRun = await octokit.checks.create({ ...report,
+      status: 'in_progress',
+      output: { ...report.output,
+        annotations: initial
+      }
+    });
+
+    while (remaining.length > 0) {
+      const next = remaining.slice(0, 50);
+      console.log('sending annotations', next.length, next);
+      await octokit.checks.update({
+        owner: report.owner,
+        repo: report.repo,
+        check_run_id: checkRun.data.id,
+        status: 'in_progress',
+        output: { ...report.output,
+          annotations: next
+        }
+      });
+      remaining = remaining.slice(50);
+    }
+
+    await octokit.checks.update({
+      owner: report.owner,
+      repo: report.repo,
+      check_run_id: checkRun.data.id,
+      conclusion: 'neutral',
+      output: { ...report.output,
+        annotations: []
+      }
+    });
+  }).then(result => console.log('success', result.data.url), error => (0, _core.setFailed)(error.message));
 } catch (error) {
   (0, _core.setFailed)(error.message);
 }
@@ -653,12 +683,12 @@ function readContents(path) {
   });
 }
 
-function trailingSlash($path) {
-  if ($path == null) {
+function trailingSlash(path) {
+  if (path == null) {
     return '';
   }
 
-  return $path.slice(-1) === '/' ? $path : $path + '/';
+  return path.slice(-1) === '/' ? path : path + '/';
 }
 
 function selectReporter(type) {
@@ -668,10 +698,20 @@ function selectReporter(type) {
         return _typescript.default;
       }
 
+    case 'eslint':
+      {
+        return _eslint.default;
+      }
+
     case 'psalm':
-    default:
+    case '':
       {
         return _psalm.default;
+      }
+
+    default:
+      {
+        throw new Error('Reporter not known ' + type);
       }
   }
 }
@@ -2598,6 +2638,94 @@ function applyAcceptHeader (res, headers) {
   return headers
 }
 
+
+/***/ }),
+
+/***/ 275:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _collectBuffers = __webpack_require__(711);
+
+const parseJson = () => {};
+
+const reporter = async options => {
+  return {
+    owner: options.owner,
+    repo: options.repo,
+    name: options.reportName,
+    head_sha: options.headSha,
+    status: 'completed',
+    conclusion: 'neutral',
+    output: {
+      title: options.reportTitle,
+      summary: '',
+      annotations: await createAnnotations(options.reportContents, options.workspaceDirectory)
+    }
+  };
+};
+
+async function createAnnotations(stream, prefix) {
+  const json = await (0, _collectBuffers.parseJsonStream)(stream);
+  return json.reduce((annotations, file) => {
+    return [...annotations, ...file.messages.map(message => messageToAnnotation(file, message, prefix))];
+  }, []);
+}
+
+function messageToAnnotation(file, message, prefix) {
+  var _message$endLine;
+
+  const base = {
+    title: message.ruleId,
+    annotation_level: noticeLevel(message.severity),
+    start_line: message.line,
+    end_line: (_message$endLine = message.endLine) !== null && _message$endLine !== void 0 ? _message$endLine : message.line,
+    path: file.filePath.slice(prefix.length),
+    raw_details: JSON.stringify(message, null, ' '),
+    message: message.message
+  };
+  const columns = message.column && message.endColumn ? {
+    start_column: message.column,
+    end_column: message.endColumn
+  } : null;
+
+  if (columns && base.start_line === base.end_line) {
+    return { ...base,
+      ...columns
+    };
+  }
+
+  return base;
+}
+
+function noticeLevel(severity) {
+  switch (severity) {
+    case 1:
+      {
+        return 'warning';
+      }
+
+    case 2:
+      {
+        return 'failure';
+      }
+
+    default:
+      {
+        return 'notice';
+      }
+  }
+}
+
+var _default = reporter;
+exports.default = _default;
 
 /***/ }),
 
@@ -9094,6 +9222,35 @@ module.exports = (promise, onFinally) => {
 	);
 };
 
+
+/***/ }),
+
+/***/ 711:
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = collectBuffers;
+exports.parseJsonStream = parseJsonStream;
+
+function collectBuffers(stream) {
+  return new Promise((resolve, reject) => {
+    const buffers = [];
+    stream.on('data', data => {
+      buffers.push(data);
+    }).on('close', () => {
+      resolve(Buffer.concat(buffers));
+    }).on('error', reject).resume();
+  });
+}
+
+function parseJsonStream(stream) {
+  return collectBuffers(stream).then(buffer => JSON.parse(buffer.toString('utf8')));
+}
 
 /***/ }),
 
