@@ -55,8 +55,8 @@ try {
         .then(async report => {
             // make a request for every 50 annotations, first one to create the report, remaining to update it
             const annotations = report.output.annotations.slice();
-            const initial = annotations.slice(0, 50);
-            let remaining = annotations.slice(50, 0);
+            const initial = annotations.slice(0, 1);
+            let remaining = annotations.slice(1, 0);
 
             const checkRun = await octokit.checks.create({
                 ...report,
@@ -70,17 +70,21 @@ try {
             console.log('check run created', checkRun);
 
             while(remaining.length > 0) {
+                const next = remaining.slice(0, 1);
+                console.log('updating', next);
                 await octokit.checks.update({
                     owner: report.owner,
                     repo: report.repo,
                     check_run_id: checkRun.data.id,
                     output: {
                         ...report.output,
-                        annotations: remaining.slice(0, 50)
+                        annotations: next,
                     }
                 });
-                remaining = remaining.slice(50);
+                remaining = remaining.slice(1);
             }
+
+            console.log('completing');
 
             await octokit.checks.update({
                 check_run_id: checkRun.data.id,
