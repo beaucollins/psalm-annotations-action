@@ -67,7 +67,7 @@ try {
                 }
             });
 
-            console.log('check run created', checkRun.data);
+            console.log('check run created data:', checkRun.data);
 
             console.log('remaining', remaining.length);
             while(remaining.length > 0) {
@@ -94,6 +94,7 @@ try {
                 owner: report.owner,
                 repo: report.repo,
                 completed_at: (new Date()).toISOString(),
+                conclusion: 'neutral',
             });
 
         })
