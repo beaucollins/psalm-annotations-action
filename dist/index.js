@@ -635,7 +635,8 @@ try {
         annotations: initial
       }
     });
-    console.log('check run created', checkRun);
+    console.log('check run created', checkRun.data);
+    console.log('remaining', remaining.length);
 
     while (remaining.length > 0) {
       const next = remaining.slice(0, 1);
@@ -649,6 +650,7 @@ try {
         }
       });
       remaining = remaining.slice(1);
+      console.log('remaining', remaining.length);
     }
 
     console.log('completing');
