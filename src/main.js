@@ -77,6 +77,7 @@ try {
                     owner: report.owner,
                     repo: report.repo,
                     check_run_id: checkRun.data.id,
+                    status: 'in_progress',
                     output: {
                         ...report.output,
                         annotations: next,
@@ -92,7 +93,7 @@ try {
                 check_run_id: checkRun.data.id,
                 owner: report.owner,
                 repo: report.repo,
-                status: 'completed',
+                completed_at: (new Date()).toISOString(),
             });
 
         })
