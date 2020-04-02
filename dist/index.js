@@ -2643,20 +2643,17 @@ async function createAnnotations(stream) {
 }
 
 function messageToAnnotation(file, message) {
-  console.log('annotation for', file, message);
-  const annotation = {
+  return {
     title: message.ruleId + ' ' + message.message,
     annotation_level: 'notice',
     start_column: message.column,
     end_column: message.endColumn,
-    start_line: message.start_line,
+    start_line: message.line,
     end_line: message.endLine,
     path: file.filePath,
     raw_details: JSON.stringify(message, null, ' '),
     message: message.message
   };
-  console.log(annotation);
-  return annotation;
 }
 
 var _default = reporter;
