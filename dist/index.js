@@ -635,6 +635,7 @@ try {
         annotations: initial
       }
     });
+    console.log('check run created', checkRun);
 
     while (remaining.length > 0) {
       await octokit.checks.update({
