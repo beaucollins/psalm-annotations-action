@@ -2696,7 +2696,7 @@ function messageToAnnotation(file, message, prefix) {
     end_column: message.endColumn
   } : null;
 
-  if (columns) {
+  if (columns && base.start_line === base.end_line) {
     return { ...base,
       ...columns
     };

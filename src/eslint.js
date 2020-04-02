@@ -48,7 +48,7 @@ function messageToAnnotation(file, message, prefix): Annotation {
 		}
 		: null;
 
-	if (columns) {
+	if (columns && base.start_line === base.end_line) {
 		return {...base, ...columns};
 	}
 	return base;
