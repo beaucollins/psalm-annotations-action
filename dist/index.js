@@ -2637,14 +2637,14 @@ const reporter = async options => {
 
 async function createAnnotations(stream) {
   const json = await (0, _collectBuffers.parseJsonStream)(stream);
-  console.log('creating report from ', json);
   return json.reduce((annotations, file) => {
     return [...annotations, ...file.messages.map(message => messageToAnnotation(file, message))];
   }, []);
 }
 
 function messageToAnnotation(file, message) {
-  return {
+  console.log('annotation for', file, message);
+  const annotation = {
     title: message.ruleId + ' ' + message.message,
     annotation_level: 'notice',
     start_column: message.column,
@@ -2655,6 +2655,8 @@ function messageToAnnotation(file, message) {
     raw_details: JSON.stringify(message, null, ' '),
     message: message.message
   };
+  console.log(annotation);
+  return annotation;
 }
 
 var _default = reporter;

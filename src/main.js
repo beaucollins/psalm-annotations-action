@@ -86,7 +86,6 @@ function trailingSlash(path: void | null | string): string {
     return path.slice(-1) === '/' ? path : path + '/';
 }
 
-
 function selectReporter(type: string): ?Reporter {
     switch(type) {
         case 'typescript': {
