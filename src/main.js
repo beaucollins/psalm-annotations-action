@@ -74,7 +74,10 @@ try {
                     owner: report.owner,
                     repo: report.repo,
                     check_run_id: checkRun.data.id,
-                    output: { annotations: remaining.slice(0, 50)}
+                    output: {
+                        ...report.output,
+                        annotations: remaining.slice(0, 50)
+                    }
                 });
                 remaining = remaining.slice(50);
             }

@@ -642,7 +642,7 @@ try {
         owner: report.owner,
         repo: report.repo,
         check_run_id: checkRun.data.id,
-        output: {
+        output: { ...report.output,
           annotations: remaining.slice(0, 50)
         }
       });
