@@ -653,12 +653,12 @@ function readContents(path) {
   });
 }
 
-function trailingSlash($path) {
-  if ($path == null) {
+function trailingSlash(path) {
+  if (path == null) {
     return '';
   }
 
-  return $path.slice(-1) === '/' ? $path : $path + '/';
+  return path.slice(-1) === '/' ? path : path + '/';
 }
 
 function selectReporter(type) {
@@ -669,9 +669,14 @@ function selectReporter(type) {
       }
 
     case 'psalm':
-    default:
+    case '':
       {
         return _psalm.default;
+      }
+
+    default:
+      {
+        throw new Error('Reporter not known ' + type);
       }
   }
 }

@@ -77,12 +77,12 @@ function readContents( path ): Promise<Buffer> {
     });
 }
 
-function trailingSlash($path: void | null | string): string {
-    if ( $path == null ) {
+function trailingSlash(path: void | null | string): string {
+    if ( path == null ) {
         return '';
     }
 
-    return $path.slice(-1) === '/' ? $path : $path + '/';
+    return path.slice(-1) === '/' ? path : path + '/';
 }
 
 
