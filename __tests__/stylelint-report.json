@@ -1,0 +1,76 @@
+[
+  {
+    "source": "/Users/beau/code/psalm-annotations-action/example-css/style.css",
+    "deprecations": [],
+    "invalidOptionWarnings": [],
+    "parseErrors": [],
+    "errored": true,
+    "warnings": [
+      {
+        "line": 1,
+        "column": 6,
+        "rule": "block-no-empty",
+        "severity": "error",
+        "text": "Unexpected empty block (block-no-empty)"
+      },
+      {
+        "line": 6,
+        "column": 3,
+        "rule": "property-no-unknown",
+        "severity": "error",
+        "text": "Unexpected unknown property \"not-a-prop\" (property-no-unknown)"
+      },
+      {
+        "line": 5,
+        "column": 1,
+        "rule": "selector-type-no-unknown",
+        "severity": "error",
+        "text": "Unexpected unknown type selector \"thing\" (selector-type-no-unknown)"
+      }
+    ]
+  },
+  {
+    "source": "/Users/beau/code/psalm-annotations-action/example-css/style.scss",
+    "deprecations": [],
+    "invalidOptionWarnings": [],
+    "parseErrors": [],
+    "errored": true,
+    "warnings": [
+      {
+        "line": 2,
+        "column": 15,
+        "rule": "declaration-block-trailing-semicolon",
+        "severity": "error",
+        "text": "Expected a trailing semicolon (declaration-block-trailing-semicolon)"
+      },
+      {
+        "line": 2,
+        "column": 2,
+        "rule": "property-no-unknown",
+        "severity": "error",
+        "text": "Unexpected unknown property \"note\" (property-no-unknown)"
+      },
+      {
+        "line": 1,
+        "column": 1,
+        "rule": "selector-combinator-space-after",
+        "severity": "error",
+        "text": "Expected single space after \"+\" (selector-combinator-space-after)"
+      },
+      {
+        "line": 1,
+        "column": 2,
+        "rule": "selector-type-no-unknown",
+        "severity": "error",
+        "text": "Unexpected unknown type selector \"other\" (selector-type-no-unknown)"
+      },
+      {
+        "line": 2,
+        "column": 2,
+        "rule": "indentation",
+        "severity": "error",
+        "text": "Expected indentation of 2 spaces (indentation)"
+      }
+    ]
+  }
+]

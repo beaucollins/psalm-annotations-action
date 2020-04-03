@@ -79,3 +79,27 @@ jobs:
         report_path: ./example-js/report.json
         report_type: eslint
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  stylelint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: npm install
+      run: npm install
+      working-directory: ./example-css
+
+    - name: Stylelint
+      run: npm run -s lint -- --formatter json > ./css-report.json
+      working-directory: ./example-css
+
+    - name: Report Failures
+      if: always()
+      uses: beaucollins/psalm-annotations-action@stylelint
+      with:
+        report_name: stylelint
+        report_title: Stylelint
+        report_path: ./example-css/css-report.json
+        report_type: stylelint
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

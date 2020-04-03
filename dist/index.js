@@ -580,6 +580,8 @@ var _typescript = _interopRequireDefault(__webpack_require__(290));
 
 var _eslint = _interopRequireDefault(__webpack_require__(275));
 
+var _stylelint = _interopRequireDefault(__webpack_require__(120));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const octokit = new _action.Octokit();
@@ -629,7 +631,6 @@ try {
     const annotations = report.output.annotations.slice();
     const initial = annotations.slice(0, 50);
     let remaining = annotations.slice(50);
-    console.log('initial annotations', initial.length, initial);
     const checkRun = await octokit.checks.create({ ...report,
       status: 'in_progress',
       output: { ...report.output,
@@ -639,7 +640,6 @@ try {
 
     while (remaining.length > 0) {
       const next = remaining.slice(0, 50);
-      console.log('sending annotations', next.length, next);
       await octokit.checks.update({
         owner: report.owner,
         repo: report.repo,
@@ -692,6 +692,8 @@ function trailingSlash(path) {
 }
 
 function selectReporter(type) {
+  console.log('Using reporter for', type);
+
   switch (type) {
     case 'typescript':
       {
@@ -701,6 +703,11 @@ function selectReporter(type) {
     case 'eslint':
       {
         return _eslint.default;
+      }
+
+    case 'stylelint':
+      {
+        return _stylelint.default;
       }
 
     case 'psalm':
@@ -755,6 +762,61 @@ module.exports = macosRelease;
 // TODO: remove this in the next major version
 module.exports.default = macosRelease;
 
+
+/***/ }),
+
+/***/ 120:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _collectBuffers = __webpack_require__(711);
+
+const stylelint = async options => {
+  const json = await (0, _collectBuffers.parseJsonStream)(options.reportContents);
+  return {
+    repo: options.repo,
+    owner: options.owner,
+    head_sha: options.headSha,
+    name: options.reportName,
+    status: 'completed',
+    conclusion: 'neutral',
+    output: {
+      title: options.reportTitle,
+      summary: '',
+      annotations: createAnnotations(json, options.workspaceDirectory)
+    }
+  };
+};
+
+function createAnnotations(report, path) {
+  return report.reduce((annotations, fileReport) => {
+    return [...annotations, ...fileAnnotations(fileReport, path)];
+  }, []);
+}
+
+function fileAnnotations(file, path) {
+  return file.warnings.map(warning => ({
+    annotation_level: warning.severity === 'error' ? 'failure' : 'warning',
+    start_line: warning.line,
+    end_line: warning.line,
+    start_column: warning.column,
+    end_column: warning.column,
+    path: file.source.slice(path ? path.length : 0),
+    message: warning.text,
+    title: warning.rule,
+    raw_details: JSON.stringify(warning, null, ' ')
+  }));
+}
+
+var _default = stylelint;
+exports.default = _default;
 
 /***/ }),
 

@@ -11,6 +11,7 @@ import type { Reporter } from './reporter';
 import psalm from './psalm';
 import typescript from './typescript';
 import eslint from './eslint';
+import stylelint from './stylelint';
 
 export const octokit = new Octokit();
 
@@ -58,7 +59,6 @@ try {
             const initial = annotations.slice(0, 50);
             let remaining = annotations.slice(50);
 
-            console.log('initial annotations', initial.length, initial);
             const checkRun = await octokit.checks.create({
                 ...report,
                 status: 'in_progress',
@@ -70,7 +70,6 @@ try {
 
             while(remaining.length > 0) {
                 const next = remaining.slice(0, 50);
-                console.log('sending annotations', next.length, next);
                 await octokit.checks.update({
                     owner: report.owner,
                     repo: report.repo,
@@ -129,12 +128,16 @@ function trailingSlash(path: void | null | string): string {
 }
 
 function selectReporter(type: string): ?Reporter {
+    console.log('Using reporter for', type);
     switch(type) {
         case 'typescript': {
             return typescript;
         }
         case 'eslint': {
             return eslint;
+        }
+        case 'stylelint': {
+            return stylelint;
         }
         case 'psalm':
         case '': {
