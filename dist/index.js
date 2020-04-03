@@ -692,6 +692,8 @@ function trailingSlash(path) {
 }
 
 function selectReporter(type) {
+  console.log('Using reporter for', type);
+
   switch (type) {
     case 'typescript':
       {
