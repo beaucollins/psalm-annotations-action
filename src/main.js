@@ -11,6 +11,7 @@ import type { Reporter } from './reporter';
 import psalm from './psalm';
 import typescript from './typescript';
 import eslint from './eslint';
+import stylelint from './stylelint';
 
 export const octokit = new Octokit();
 
@@ -136,6 +137,9 @@ function selectReporter(type: string): ?Reporter {
         }
         case 'eslint': {
             return eslint;
+        }
+        case 'stylelint': {
+            return stylelint;
         }
         case 'psalm':
         case '': {

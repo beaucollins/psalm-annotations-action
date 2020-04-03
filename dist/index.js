@@ -580,6 +580,8 @@ var _typescript = _interopRequireDefault(__webpack_require__(290));
 
 var _eslint = _interopRequireDefault(__webpack_require__(275));
 
+var _stylelint = _interopRequireDefault(__webpack_require__(120));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const octokit = new _action.Octokit();
@@ -705,6 +707,11 @@ function selectReporter(type) {
         return _eslint.default;
       }
 
+    case 'stylelint':
+      {
+        return _stylelint.default;
+      }
+
     case 'psalm':
     case '':
       {
@@ -757,6 +764,59 @@ module.exports = macosRelease;
 // TODO: remove this in the next major version
 module.exports.default = macosRelease;
 
+
+/***/ }),
+
+/***/ 120:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _collectBuffers = __webpack_require__(711);
+
+const stylelint = async options => {
+  const json = await (0, _collectBuffers.parseJsonStream)(options.reportContents);
+  return {
+    repo: options.repo,
+    owner: options.owner,
+    head_sha: options.headSha,
+    name: options.reportName,
+    status: 'completed',
+    conclusion: 'neutral',
+    output: {
+      title: options.reportTitle,
+      summary: '',
+      annotations: createAnnotations(json)
+    }
+  };
+};
+
+function createAnnotations(report) {
+  return report.reduce((annotations, fileReport) => {
+    return [...annotations, ...fileAnnotations(fileReport)];
+  }, []);
+}
+
+function fileAnnotations(file) {
+  return file.warnings.map(warning => ({
+    annotation_level: warning.severity === 'error' ? 'failure' : 'warning',
+    start_line: warning.line,
+    end_line: warning.line,
+    start_column: warning.column,
+    path: file.source,
+    message: warning.text,
+    title: warning.rule
+  }));
+}
+
+var _default = stylelint;
+exports.default = _default;
 
 /***/ }),
 
