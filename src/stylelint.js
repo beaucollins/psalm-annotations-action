@@ -16,29 +16,31 @@ const stylelint: Reporter = async (options) => {
 		output: {
 			title: options.reportTitle,
 			summary: '',
-			annotations: createAnnotations( json ),
+			annotations: createAnnotations( json, options.workspaceDirectory ),
 		}
 	}
 }
 
-function createAnnotations(report): Annotation[] {
+function createAnnotations(report, path): Annotation[] {
 	return report.reduce(
 		(annotations: Annotation[], fileReport) => {
-			return [...annotations, ...fileAnnotations(fileReport)];
+			return [...annotations, ...fileAnnotations(fileReport, path)];
 		},
 		[]
 	);
 }
 
-function fileAnnotations(file): Annotation[] {
+function fileAnnotations(file, path): Annotation[] {
 	return file.warnings.map((warning): Annotation => ({
 		annotation_level: warning.severity === 'error' ? 'failure' : 'warning',
 		start_line: warning.line,
 		end_line: warning.line,
 		start_column: warning.column,
-		path: file.source,
+		end_column: warning.column,
+		path: file.source.slice(path ? path.length : 0),
 		message: warning.text,
 		title: warning.rule,
+		raw_details: JSON.stringify(warning, null, ' '),
 	}));
 }
 

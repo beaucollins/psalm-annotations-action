@@ -631,7 +631,6 @@ try {
     const annotations = report.output.annotations.slice();
     const initial = annotations.slice(0, 50);
     let remaining = annotations.slice(50);
-    console.log('initial annotations', initial.length, initial);
     const checkRun = await octokit.checks.create({ ...report,
       status: 'in_progress',
       output: { ...report.output,
@@ -641,7 +640,6 @@ try {
 
     while (remaining.length > 0) {
       const next = remaining.slice(0, 50);
-      console.log('sending annotations', next.length, next);
       await octokit.checks.update({
         owner: report.owner,
         repo: report.repo,
@@ -792,26 +790,28 @@ const stylelint = async options => {
     output: {
       title: options.reportTitle,
       summary: '',
-      annotations: createAnnotations(json)
+      annotations: createAnnotations(json, options.workspaceDirectory)
     }
   };
 };
 
-function createAnnotations(report) {
+function createAnnotations(report, path) {
   return report.reduce((annotations, fileReport) => {
-    return [...annotations, ...fileAnnotations(fileReport)];
+    return [...annotations, ...fileAnnotations(fileReport, path)];
   }, []);
 }
 
-function fileAnnotations(file) {
+function fileAnnotations(file, path) {
   return file.warnings.map(warning => ({
     annotation_level: warning.severity === 'error' ? 'failure' : 'warning',
     start_line: warning.line,
     end_line: warning.line,
     start_column: warning.column,
-    path: file.source,
+    end_column: warning.column,
+    path: file.source.slice(path ? path.length : 0),
     message: warning.text,
-    title: warning.rule
+    title: warning.rule,
+    raw_details: JSON.stringify(warning, null, ' ')
   }));
 }
 
