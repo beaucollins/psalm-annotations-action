@@ -101,5 +101,5 @@ jobs:
         report_name: stylelint
         report_title: Stylelint
         report_path: ./example-css/css-report.json
-        report_type: eslint
+        report_type: stylelint
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
