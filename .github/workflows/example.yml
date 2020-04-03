@@ -91,7 +91,7 @@ jobs:
       working-directory: ./example-css
 
     - name: Stylelint
-      run: npm run lint -- --formatter json > ./css-report.json
+      run: npm run -s lint -- --formatter json > ./css-report.json
       working-directory: ./example-css
 
     - name: Report Failures
