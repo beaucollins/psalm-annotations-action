@@ -83,7 +83,7 @@ try {
                 remaining = remaining.slice(50);
             }
 
-            await octokit.checks.update({
+            return await octokit.checks.update({
                 owner: report.owner,
                 repo: report.repo,
                 check_run_id: checkRun.data.id,
