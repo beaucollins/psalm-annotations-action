@@ -78,11 +78,13 @@ async function createAnnotations(stream, prefix) {
 }
 
 function messageToAnnotation(file, message, prefix) {
+  var _message$endLine;
+
   const base = {
     title: message.ruleId,
     annotation_level: noticeLevel(message.severity),
     start_line: message.line,
-    end_line: message.endLine ?? message.line,
+    end_line: (_message$endLine = message.endLine) !== null && _message$endLine !== void 0 ? _message$endLine : message.line,
     path: file.filePath.slice(prefix.length),
     raw_details: JSON.stringify(message, null, ' '),
     message: message.message
