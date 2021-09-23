@@ -27,6 +27,10 @@ jobs:
       - name: Report Failures
         if: always()
         uses: beaucollins/psalm-annotations-action@v1
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         with:
           report_path: ./example/report.json
 ```

@@ -24,6 +24,10 @@ jobs:
       - name: Report Failures
         if: always()
         uses: beaucollins/psalm-annotations-action@fix-node-version
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         with:
           report_title: LOL
           report_path: ./example-php/report.json
@@ -45,6 +49,10 @@ jobs:
       - name: Report Failures
         if: always()
         uses: beaucollins/psalm-annotations-action@fix-node-version
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         with:
           report_name: tsc
           report_title: tsc
@@ -69,6 +77,9 @@ jobs:
       - name: Report Failures
         if: always()
         uses: beaucollins/psalm-annotations-action@fix-node-version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         with:
           report_name: eslint
           report_title: ESLint
@@ -92,6 +103,9 @@ jobs:
       - name: Report Failures
         if: always()
         uses: beaucollins/psalm-annotations-action@fix-node-version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         with:
           report_name: stylelint
           report_title: Stylelint
