@@ -1,105 +1,99 @@
-name: 'Example'
+name: "Example"
 
 on: [push]
 
 jobs:
   psalm:
-
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate
-      working-directory: ./example-php
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+        working-directory: ./example-php
 
-    - name: Composer Install
-      run: composer install --quiet --no-suggest
-      working-directory: ./example-php
+      - name: Composer Install
+        run: composer install --quiet --no-suggest
+        working-directory: ./example-php
 
-    - name: Type Check
-      run: composer check -- --report=report.json --stats
-      working-directory: ./example-php
+      - name: Type Check
+        run: composer check -- --report=report.json --stats
+        working-directory: ./example-php
 
-    - name: Report Failures
-      if: always()
-      uses: beaucollins/psalm-annotations-action@master
-      with:
-        report_title: LOL
-        report_path: ./example-php/report.json
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Report Failures
+        if: always()
+        uses: beaucollins/psalm-annotations-action@master
+        with:
+          report_title: LOL
+          report_path: ./example-php/report.json
 
   typescript:
-
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: npm install
-      run: npm install
-      working-directory: ./example-ts
+      - name: npm install
+        run: npm install
+        working-directory: ./example-ts
 
-    - name: Type Check
-      run: npm run -s check > ./report.txt
-      working-directory: ./example-ts
+      - name: Type Check
+        run: npm run -s check > ./report.txt
+        working-directory: ./example-ts
 
-    - name: Report Failures
-      if: always()
-      uses: beaucollins/psalm-annotations-action@master
-      with:
-        report_name: tsc
-        report_title: tsc
-        report_path: ./example-ts/report.txt
-        report_type: typescript
-        src_directory: example-ts
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Report Failures
+        if: always()
+        uses: beaucollins/psalm-annotations-action@master
+        with:
+          report_name: tsc
+          report_title: tsc
+          report_path: ./example-ts/report.txt
+          report_type: typescript
+          src_directory: example-ts
 
   javascript:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: npm install
-      run: npm install
-      working-directory: ./example-js
+      - name: npm install
+        run: npm install
+        working-directory: ./example-js
 
-    - name: ESLint
-      run: npm run lint -- --format json --output-file ./report.json
-      working-directory: ./example-js
+      - name: ESLint
+        run: npm run lint -- --format json --output-file ./report.json
+        working-directory: ./example-js
 
-    - name: Report Failures
-      if: always()
-      uses: beaucollins/psalm-annotations-action@master
-      with:
-        report_name: eslint
-        report_title: ESLint
-        report_path: ./example-js/report.json
-        report_type: eslint
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Report Failures
+        if: always()
+        uses: beaucollins/psalm-annotations-action@master
+        with:
+          report_name: eslint
+          report_title: ESLint
+          report_path: ./example-js/report.json
+          report_type: eslint
 
   stylelint:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: npm install
-      run: npm install
-      working-directory: ./example-css
+      - name: npm install
+        run: npm install
+        working-directory: ./example-css
 
-    - name: Stylelint
-      run: npm run -s lint -- --formatter json > ./css-report.json
-      working-directory: ./example-css
+      - name: Stylelint
+        run: npm run -s lint -- --formatter json > ./css-report.json
+        working-directory: ./example-css
 
-    - name: Report Failures
-      if: always()
-      uses: beaucollins/psalm-annotations-action@stylelint
-      with:
-        report_name: stylelint
-        report_title: Stylelint
-        report_path: ./example-css/css-report.json
-        report_type: stylelint
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Report Failures
+        if: always()
+        uses: beaucollins/psalm-annotations-action@stylelint
+        with:
+          report_name: stylelint
+          report_title: Stylelint
+          report_path: ./example-css/css-report.json
+          report_type: stylelint
